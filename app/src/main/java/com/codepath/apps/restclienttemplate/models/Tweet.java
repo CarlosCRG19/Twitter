@@ -19,6 +19,7 @@ public class Tweet {
     public String createdAt;
     public User user;
     public String timestamp;
+    public Media media;
 
     public Tweet(){}
 
@@ -28,6 +29,12 @@ public class Tweet {
         tweet.createdAt = jsonObject.getString("created_at");
         tweet.user = User.fromJson(jsonObject.getJSONObject("user"));
         tweet.timestamp = tweet.initializeTimestamp(tweet.createdAt);
+
+        JSONObject entities = jsonObject.getJSONObject("entities");
+        if(entities.has("media")) {
+            tweet.media = Media.fromJson(entities.getJSONArray("media").getJSONObject(0));
+        }
+
         return tweet;
     }
 
@@ -77,5 +84,4 @@ public class Tweet {
         return "";
 
     }
-
 }
