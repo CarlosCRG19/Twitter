@@ -42,7 +42,6 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
         this.tweets = tweets;
     }
 
-
     @NonNull
     @NotNull
     @Override
@@ -79,7 +78,7 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
 
         ImageView ivProfileImage;
         TextView tvBody;
-        TextView tvScreenName;
+        TextView tvName, tvScreenName;
         TextView tvTimestamp;
         ImageView ivMedia;
         Button btnReply, btnFavorites;
@@ -93,6 +92,7 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
             ivMedia = (ImageView) itemView.findViewById(R.id.ivMedia);
             ivProfileImage = itemView.findViewById(R.id.ivProfileImage);
             tvBody = itemView.findViewById(R.id.tvBody);
+            tvName = itemView.findViewById(R.id.tvName);
             tvScreenName = itemView.findViewById(R.id.tvScreenName);
             tvTimestamp = itemView.findViewById(R.id.tvTimestamp);
             cvMedia = itemView.findViewById(R.id.cardImage);
@@ -132,6 +132,7 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
                             }
                         });
                         favoritesAction = false;
+                        btnFavorites.setBackgroundResource(R.drawable.ic_vector_heart);
                     } else {
                         client.postFavorites(tweet.id, "create", new JsonHttpResponseHandler() {
                             @Override
@@ -145,6 +146,7 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
                             }
                         });
                         favoritesAction = true;
+                        btnFavorites.setBackgroundResource(R.drawable.ic_vector_heart_stroke);
                     }
                 }
             });

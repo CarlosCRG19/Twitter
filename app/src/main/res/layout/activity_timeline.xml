@@ -47,6 +47,7 @@
         android:layout_marginStart="2dp"
         android:layout_marginTop="31dp"
         android:layout_marginEnd="-1dp"
+        android:elevation="1dp"
         android:layout_marginBottom="-1dp">
 
         <androidx.recyclerview.widget.RecyclerView

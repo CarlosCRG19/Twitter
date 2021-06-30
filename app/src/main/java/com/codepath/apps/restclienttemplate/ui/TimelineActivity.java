@@ -3,6 +3,7 @@ package com.codepath.apps.restclienttemplate.ui;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -20,6 +21,7 @@ import com.codepath.apps.restclienttemplate.R;
 import com.codepath.apps.restclienttemplate.TwitterApp;
 import com.codepath.apps.restclienttemplate.TwitterClient;
 import com.codepath.apps.restclienttemplate.adapters.TweetsAdapter;
+import com.codepath.apps.restclienttemplate.fragments.ComposeFragment;
 import com.codepath.apps.restclienttemplate.models.EndlessRecyclerViewScrollListener;
 import com.codepath.apps.restclienttemplate.models.Tweet;
 import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler;
@@ -33,7 +35,7 @@ import java.util.List;
 
 import okhttp3.Headers;
 
-public class TimelineActivity extends AppCompatActivity {
+public class TimelineActivity extends AppCompatActivity implements ComposeFragment.ComposeFragmentListener {
 
     public static final String TAG = "TimelineActivity";
     public final int REQUEST_CODE = 20;
@@ -89,10 +91,12 @@ public class TimelineActivity extends AppCompatActivity {
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                swipeContainer.setRefreshing(false);
                 // Your code to refresh the list here.
                 // Make sure you call swipeContainer.setRefreshing(false)
                 // once the network request has completed successfully.
                 max_id = 0L;
+                showProgressBar();
                 populateHomeTimeline();
             }
         });
@@ -106,8 +110,9 @@ public class TimelineActivity extends AppCompatActivity {
         btnCompose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(TimelineActivity.this, ComposeActivity.class);
-                startActivityForResult(intent, REQUEST_CODE);
+                startComposeFragment();
+//                Intent intent = new Intent(TimelineActivity.this, ComposeActivity.class);
+//                startActivityForResult(intent, REQUEST_CODE);
             }
         });
 
@@ -124,9 +129,14 @@ public class TimelineActivity extends AppCompatActivity {
 
     }
 
+    private void startComposeFragment() {
+        FragmentManager fm = getSupportFragmentManager();
+        ComposeFragment composeFragment = ComposeFragment.newInstance();
+        composeFragment.show(fm, "activity_compose");
+    }
+
     private void populateHomeTimeline() {
         client.getHomeTimeline(0, new JsonHttpResponseHandler(){
-
             @Override
             public void onSuccess(int statusCode, Headers headers, JSON json) {
                 Log.i(TAG, "onSuccess" + json.toString());
@@ -137,9 +147,9 @@ public class TimelineActivity extends AppCompatActivity {
                     tweets.addAll(Tweet.fromJsonArray(jsonArray));
                     adapter.notifyDataSetChanged();
                     hideProgressBar();
-                    swipeContainer.setRefreshing(false);
                 } catch (JSONException e) {
                     Log.e(TAG, "JSON Exception", e);
+                    hideProgressBar();
                 }
             }
 
@@ -151,6 +161,7 @@ public class TimelineActivity extends AppCompatActivity {
     }
 
     private void fetchHomeTimeline() {
+        showProgressBar();
         initializeMaxId();
         client.getHomeTimeline(max_id, new JsonHttpResponseHandler(){
 
@@ -162,9 +173,9 @@ public class TimelineActivity extends AppCompatActivity {
                     tweets.addAll(Tweet.fromJsonArray(jsonArray));
                     adapter.notifyDataSetChanged();
                     hideProgressBar();
-                    swipeContainer.setRefreshing(false);
                 } catch (JSONException e) {
                     Log.e(TAG, "JSON Exception", e);
+                    hideProgressBar();
                 }
             }
 
@@ -179,6 +190,7 @@ public class TimelineActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         miActionProgressItem = menu.findItem(R.id.miActionProgress);
+        showProgressBar();
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -216,5 +228,16 @@ public class TimelineActivity extends AppCompatActivity {
             max_id = Math.min(max_id, Long.parseLong(tweets.get(i).id));
         }
         max_id -= 1;
+    }
+
+    @Override
+    public void onFinishCompose(Tweet tweet) {
+        // Get data from intent (tweet object)
+        Tweet newTweet = tweet;
+        // Update RV with the tweet
+        tweets.add(0, newTweet);
+        // Update Adapter
+        adapter.notifyItemInserted(0);
+        rvTweets.smoothScrollToPosition(0);
     }
 }

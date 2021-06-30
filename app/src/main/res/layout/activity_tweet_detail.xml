@@ -30,6 +30,7 @@
         android:layout_below="@+id/tvScreenName"
         android:layout_marginStart="12dp"
         android:layout_marginTop="2dp"
+        android:autoLink="all"
         android:layout_toEndOf="@+id/ivProfileImage"
         android:text="TextView" />
 
