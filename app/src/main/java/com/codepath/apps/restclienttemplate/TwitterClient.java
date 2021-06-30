@@ -43,11 +43,15 @@ public class TwitterClient extends OAuthBaseClient {
 	}
 	// CHANGE THIS
 	// DEFINE METHODS for different API endpoints here
-	public void getHomeTimeline(JsonHttpResponseHandler handler) {
+	public void getHomeTimeline(long max_id, JsonHttpResponseHandler handler) {
 		String apiUrl = getApiUrl("statuses/home_timeline.json");
 		RequestParams params = new RequestParams();
 		params.put("count", 25);
-		params.put("since_id", 1);
+		if(max_id != 0) {
+			params.put("max_id", max_id);
+		} else {
+			params.put("since_id", 1);
+		}
 		client.get(apiUrl, params, handler);
 	}
 
@@ -65,4 +69,13 @@ public class TwitterClient extends OAuthBaseClient {
 		params.put("in_reply_to_status_id", replyToId);
 		client.post(apiUrl, params, "", handler);
 	}
+
+	public void postFavorites(String id, String action, JsonHttpResponseHandler handler) {
+		String url = String.format("favorites/%s.json", action);
+		String apiUrl = getApiUrl(url);
+		RequestParams params = new RequestParams();
+		params.put("id", id);
+		client.post(apiUrl, params, "", handler);
+	}
+
 }

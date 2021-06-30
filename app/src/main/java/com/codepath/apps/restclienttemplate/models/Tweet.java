@@ -15,7 +15,8 @@ import java.util.Locale;
 
 @Parcel
 public class Tweet {
-    public String body, id;
+    public String body;
+    public String id;
     public String createdAt;
     public User user;
     public String timestamp;

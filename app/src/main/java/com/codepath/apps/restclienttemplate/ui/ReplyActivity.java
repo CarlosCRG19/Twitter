@@ -1,8 +1,7 @@
-package com.codepath.apps.restclienttemplate;
+package com.codepath.apps.restclienttemplate.ui;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -13,10 +12,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.codepath.apps.restclienttemplate.R;
+import com.codepath.apps.restclienttemplate.TwitterClient;
 import com.codepath.apps.restclienttemplate.models.Tweet;
 import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler;
 
-import org.json.JSONException;
 import org.parceler.Parcels;
 
 import okhttp3.Headers;
@@ -81,7 +81,6 @@ public class ReplyActivity extends AppCompatActivity {
                 });
             }
         });
-
 
     }
 }

@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".TimelineActivity">
+    android:background="@color/dark_blue"
+    tools:context=".ui.TimelineActivity">
 
     <androidx.appcompat.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/toolbar"
@@ -16,24 +17,48 @@
         app:titleTextColor="@android:color/white">
     </androidx.appcompat.widget.Toolbar>
 
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="100dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="42dp"
+        android:elevation="10dp"
+        android:background="@drawable/ic_home" />
+
+    <Button
+        android:id="@+id/btnCompose"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_toEndOf="@+id/button"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="62dp"
+        android:elevation="10dp"
+        android:background="@drawable/ic_tweet" />
+
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/toolbar"
         android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginStart="0dp"
-        android:layout_marginTop="0dp"
-        android:layout_marginBottom="0dp">
+        android:layout_marginStart="2dp"
+        android:layout_marginTop="31dp"
+        android:layout_marginEnd="-1dp"
+        android:layout_marginBottom="-1dp">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvTweets"
+            android:paddingTop="50dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@+id/btnLogout"
             android:layout_alignParentStart="true"
-            android:layout_alignParentEnd="true" />
+            android:layout_alignParentEnd="true"
+            android:background="@drawable/rv_background" />
+
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 

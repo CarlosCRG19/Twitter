@@ -9,11 +9,6 @@
         app:showAsAction="always"
         app:actionLayout="@layout/action_view_progress" />
     <item
-        android:id="@+id/compose"
-        android:icon="@android:drawable/ic_menu_edit"
-        android:title="compose"
-        app:showAsAction="always" />
-    <item
         android:id="@+id/btnLogout"
         android:title="logout"
         app:showAsAction="always"

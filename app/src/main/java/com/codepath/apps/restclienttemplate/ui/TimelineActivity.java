@@ -1,8 +1,9 @@
-package com.codepath.apps.restclienttemplate;
+package com.codepath.apps.restclienttemplate.ui;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -13,9 +14,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
+import android.widget.Button;
 
+import com.codepath.apps.restclienttemplate.R;
+import com.codepath.apps.restclienttemplate.TwitterApp;
+import com.codepath.apps.restclienttemplate.TwitterClient;
 import com.codepath.apps.restclienttemplate.adapters.TweetsAdapter;
+import com.codepath.apps.restclienttemplate.models.EndlessRecyclerViewScrollListener;
 import com.codepath.apps.restclienttemplate.models.Tweet;
 import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler;
 
@@ -37,6 +42,10 @@ public class TimelineActivity extends AppCompatActivity {
     RecyclerView rvTweets;
     List<Tweet> tweets;
     TweetsAdapter adapter;
+    Button btnCompose;
+
+    Long max_id;
+    private EndlessRecyclerViewScrollListener scrollListener;
 
     private SwipeRefreshLayout swipeContainer;
     MenuItem miActionProgressItem;
@@ -68,8 +77,11 @@ public class TimelineActivity extends AppCompatActivity {
         tweets = new ArrayList<Tweet>();
         adapter = new TweetsAdapter(this, tweets);
         // Recycler view setup: layout manager and the adapter
-        rvTweets.setLayoutManager(new LinearLayoutManager(this));
+
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        rvTweets.setLayoutManager(linearLayoutManager);
         rvTweets.setAdapter(adapter);
+        rvTweets.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         populateHomeTimeline();
 
         swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
@@ -80,6 +92,7 @@ public class TimelineActivity extends AppCompatActivity {
                 // Your code to refresh the list here.
                 // Make sure you call swipeContainer.setRefreshing(false)
                 // once the network request has completed successfully.
+                max_id = 0L;
                 populateHomeTimeline();
             }
         });
@@ -88,10 +101,31 @@ public class TimelineActivity extends AppCompatActivity {
                 android.R.color.holo_green_light,
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
+
+        btnCompose = findViewById(R.id.btnCompose);
+        btnCompose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(TimelineActivity.this, ComposeActivity.class);
+                startActivityForResult(intent, REQUEST_CODE);
+            }
+        });
+
+        scrollListener = new EndlessRecyclerViewScrollListener(linearLayoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                // Triggered only when new data needs to be appended to the list
+                // Add whatever code is needed to append new items to the bottom of the list
+                fetchHomeTimeline();
+            }
+        };
+        // Adds the scroll listener to RecyclerView
+        rvTweets.addOnScrollListener(scrollListener);
+
     }
 
     private void populateHomeTimeline() {
-        client.getHomeTimeline(new JsonHttpResponseHandler(){
+        client.getHomeTimeline(0, new JsonHttpResponseHandler(){
 
             @Override
             public void onSuccess(int statusCode, Headers headers, JSON json) {
@@ -100,6 +134,31 @@ public class TimelineActivity extends AppCompatActivity {
                 try {
                     adapter.clear();
                     tweets.clear();
+                    tweets.addAll(Tweet.fromJsonArray(jsonArray));
+                    adapter.notifyDataSetChanged();
+                    hideProgressBar();
+                    swipeContainer.setRefreshing(false);
+                } catch (JSONException e) {
+                    Log.e(TAG, "JSON Exception", e);
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
+                Log.e(TAG, "onFailure" + response, throwable);
+            }
+        });
+    }
+
+    private void fetchHomeTimeline() {
+        initializeMaxId();
+        client.getHomeTimeline(max_id, new JsonHttpResponseHandler(){
+
+            @Override
+            public void onSuccess(int statusCode, Headers headers, JSON json) {
+                Log.i(TAG, "onSuccess" + json.toString());
+                JSONArray jsonArray = json.jsonArray;
+                try {
                     tweets.addAll(Tweet.fromJsonArray(jsonArray));
                     adapter.notifyDataSetChanged();
                     hideProgressBar();
@@ -125,11 +184,7 @@ public class TimelineActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.compose) {
-            Intent intent = new Intent(TimelineActivity.this, ComposeActivity.class);
-            startActivityForResult(intent, REQUEST_CODE);
-            return true;
-        } else if (item.getItemId() == R.id.btnLogout) {
+        if (item.getItemId() == R.id.btnLogout) {
             onLogoutButton();
             return true;
         }
@@ -153,5 +208,13 @@ public class TimelineActivity extends AppCompatActivity {
     public void onLogoutButton() {
         client.clearAccessToken();
         finish();
+    }
+
+    private void initializeMaxId() {
+        max_id = Long.parseLong(tweets.get(0).id);
+        for (int i=1; i < tweets.size(); i++) {
+            max_id = Math.min(max_id, Long.parseLong(tweets.get(i).id));
+        }
+        max_id -= 1;
     }
 }

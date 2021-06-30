@@ -15,10 +15,12 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.Target;
 import com.codepath.apps.restclienttemplate.R;
-import com.codepath.apps.restclienttemplate.ReplyActivity;
+import com.codepath.apps.restclienttemplate.TwitterClient;
+import com.codepath.apps.restclienttemplate.ui.ReplyActivity;
 import com.codepath.apps.restclienttemplate.models.Tweet;
+import com.codepath.apps.restclienttemplate.ui.TweetDetailActivity;
+import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
@@ -27,6 +29,7 @@ import org.parceler.Parcels;
 import java.util.List;
 
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
+import okhttp3.Headers;
 
 public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder>{
 
@@ -72,13 +75,17 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
     // define a viewholder
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
+        public boolean favoritesAction = true;
+
         ImageView ivProfileImage;
         TextView tvBody;
         TextView tvScreenName;
         TextView tvTimestamp;
         ImageView ivMedia;
-        Button btnReply;
+        Button btnReply, btnFavorites;
         CardView cvMedia;
+
+        TwitterClient client = new TwitterClient(context);
 
         public ViewHolder(@NonNull @NotNull View itemView) {
             super(itemView);
@@ -90,8 +97,57 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
             tvTimestamp = itemView.findViewById(R.id.tvTimestamp);
             cvMedia = itemView.findViewById(R.id.cardImage);
 
+            itemView.setOnClickListener(this);
+
             btnReply = itemView.findViewById(R.id.btnReply);
-            btnReply.setOnClickListener(this);
+            btnReply.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int position = getAdapterPosition();
+                    if(position != RecyclerView.NO_POSITION) {
+                        Tweet tweet = tweets.get(position);
+                        Intent i = new Intent(context, ReplyActivity.class);
+                        i.putExtra(Tweet.class.getSimpleName(), Parcels.wrap(tweet));
+                        context.startActivity(i);
+                    }
+                }
+            });
+
+            btnFavorites = itemView.findViewById(R.id.btnFavorites);
+            btnFavorites.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int position = getAdapterPosition();
+                    Tweet tweet = tweets.get(position);
+                    if(favoritesAction) {
+                        client.postFavorites(tweet.id, "create", new JsonHttpResponseHandler() {
+                            @Override
+                            public void onSuccess(int statusCode, Headers headers, JSON json) {
+                                Log.i("Favorites", "successfully liked the tweet");
+                            }
+
+                            @Override
+                            public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
+                                Log.i("Favorites", "failure liking the tweet");
+                            }
+                        });
+                        favoritesAction = false;
+                    } else {
+                        client.postFavorites(tweet.id, "create", new JsonHttpResponseHandler() {
+                            @Override
+                            public void onSuccess(int statusCode, Headers headers, JSON json) {
+                                Log.i("Favorites", "successfully disliked the tweet");
+                            }
+
+                            @Override
+                            public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
+                                Log.i("Favorites", "failure disliking the tweet");
+                            }
+                        });
+                        favoritesAction = true;
+                    }
+                }
+            });
 
 
         }
@@ -124,7 +180,7 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
             int position = getAdapterPosition();
             if(position != RecyclerView.NO_POSITION) {
                 Tweet tweet = tweets.get(position);
-                Intent i = new Intent(context, ReplyActivity.class);
+                Intent i = new Intent(context, TweetDetailActivity.class);
                 i.putExtra(Tweet.class.getSimpleName(), Parcels.wrap(tweet));
                 context.startActivity(i);
             }
