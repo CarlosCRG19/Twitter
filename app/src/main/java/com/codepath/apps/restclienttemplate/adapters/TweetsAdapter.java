@@ -1,25 +1,32 @@
 package com.codepath.apps.restclienttemplate.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.Target;
 import com.codepath.apps.restclienttemplate.R;
+import com.codepath.apps.restclienttemplate.ReplyActivity;
 import com.codepath.apps.restclienttemplate.models.Tweet;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
+import org.parceler.Parcels;
 
 import java.util.List;
+
+import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
 public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder>{
 
@@ -63,13 +70,15 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
     // Bind values based on the position of the element
 
     // define a viewholder
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         ImageView ivProfileImage;
         TextView tvBody;
         TextView tvScreenName;
         TextView tvTimestamp;
         ImageView ivMedia;
+        Button btnReply;
+        CardView cvMedia;
 
         public ViewHolder(@NonNull @NotNull View itemView) {
             super(itemView);
@@ -79,6 +88,11 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
             tvBody = itemView.findViewById(R.id.tvBody);
             tvScreenName = itemView.findViewById(R.id.tvScreenName);
             tvTimestamp = itemView.findViewById(R.id.tvTimestamp);
+            cvMedia = itemView.findViewById(R.id.cardImage);
+
+            btnReply = itemView.findViewById(R.id.btnReply);
+            btnReply.setOnClickListener(this);
+
 
         }
 
@@ -86,15 +100,14 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
 
             if(tweet.media != null) {
                 Log.i("Media", tweet.media.getMediaUrl());
-                ivMedia.setVisibility(View.VISIBLE);
+                cvMedia.setVisibility(View.VISIBLE);
                 Glide.with(context)
                         .load(tweet.media.getMediaUrl())
-                        .placeholder(R.drawable.placeholder)
-                        .override(Target.SIZE_ORIGINAL,400)
+                        .transform(new RoundedCornersTransformation(30,0))
                         .into(ivMedia);
             } else {
                 Log.i("Media", "No media");
-                ivMedia.setVisibility(View.GONE);
+                cvMedia.setVisibility(View.GONE);
             }
 
             tvBody.setText(tweet.body);
@@ -102,7 +115,19 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
             tvTimestamp.setText(tweet.timestamp);
             Glide.with(context)
                     .load(tweet.user.profileImageUrl)
+                    .circleCrop()
                     .into(ivProfileImage);
+        }
+
+        @Override
+        public void onClick(View v) {
+            int position = getAdapterPosition();
+            if(position != RecyclerView.NO_POSITION) {
+                Tweet tweet = tweets.get(position);
+                Intent i = new Intent(context, ReplyActivity.class);
+                i.putExtra(Tweet.class.getSimpleName(), Parcels.wrap(tweet));
+                context.startActivity(i);
+            }
         }
     }
 

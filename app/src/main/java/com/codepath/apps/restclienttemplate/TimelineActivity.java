@@ -2,6 +2,7 @@ package com.codepath.apps.restclienttemplate;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -38,11 +39,26 @@ public class TimelineActivity extends AppCompatActivity {
     TweetsAdapter adapter;
 
     private SwipeRefreshLayout swipeContainer;
+    MenuItem miActionProgressItem;
+
+    public void showProgressBar() {
+        // Show progress item
+        miActionProgressItem.setVisible(true);
+    }
+
+    public void hideProgressBar() {
+        // Hide progress item
+        miActionProgressItem.setVisible(false);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_timeline);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         client = TwitterApp.getRestClient(this);
 
@@ -64,7 +80,6 @@ public class TimelineActivity extends AppCompatActivity {
                 // Your code to refresh the list here.
                 // Make sure you call swipeContainer.setRefreshing(false)
                 // once the network request has completed successfully.
-
                 populateHomeTimeline();
             }
         });
@@ -73,7 +88,6 @@ public class TimelineActivity extends AppCompatActivity {
                 android.R.color.holo_green_light,
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
-
     }
 
     private void populateHomeTimeline() {
@@ -88,10 +102,10 @@ public class TimelineActivity extends AppCompatActivity {
                     tweets.clear();
                     tweets.addAll(Tweet.fromJsonArray(jsonArray));
                     adapter.notifyDataSetChanged();
+                    hideProgressBar();
                     swipeContainer.setRefreshing(false);
                 } catch (JSONException e) {
                     Log.e(TAG, "JSON Exception", e);
-
                 }
             }
 
@@ -105,6 +119,7 @@ public class TimelineActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        miActionProgressItem = menu.findItem(R.id.miActionProgress);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -113,6 +128,9 @@ public class TimelineActivity extends AppCompatActivity {
         if (item.getItemId() == R.id.compose) {
             Intent intent = new Intent(TimelineActivity.this, ComposeActivity.class);
             startActivityForResult(intent, REQUEST_CODE);
+            return true;
+        } else if (item.getItemId() == R.id.btnLogout) {
+            onLogoutButton();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -132,7 +150,7 @@ public class TimelineActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    public void onLogoutButton(View view) {
+    public void onLogoutButton() {
         client.clearAccessToken();
         finish();
     }

@@ -15,7 +15,7 @@ import java.util.Locale;
 
 @Parcel
 public class Tweet {
-    public String body;
+    public String body, id;
     public String createdAt;
     public User user;
     public String timestamp;
@@ -25,6 +25,7 @@ public class Tweet {
 
     public static Tweet fromJson(JSONObject jsonObject) throws JSONException {
         Tweet tweet = new Tweet();
+        tweet.id = jsonObject.getString("id_str");
         tweet.body = jsonObject.getString("text");
         tweet.createdAt = jsonObject.getString("created_at");
         tweet.user = User.fromJson(jsonObject.getJSONObject("user"));
