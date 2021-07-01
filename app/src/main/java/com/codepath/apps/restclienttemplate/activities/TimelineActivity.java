@@ -1,9 +1,7 @@
-package com.codepath.apps.restclienttemplate.ui;
+package com.codepath.apps.restclienttemplate.activities;
 
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -12,13 +10,13 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.Build;
+import android.os.BadParcelableException;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 
 import com.codepath.apps.restclienttemplate.R;
 import com.codepath.apps.restclienttemplate.TwitterApp;
@@ -26,7 +24,7 @@ import com.codepath.apps.restclienttemplate.TwitterClient;
 import com.codepath.apps.restclienttemplate.adapters.TweetsAdapter;
 import com.codepath.apps.restclienttemplate.databinding.ActivityTimelineBinding;
 import com.codepath.apps.restclienttemplate.fragments.ComposeFragment;
-import com.codepath.apps.restclienttemplate.EndlessRecyclerViewScrollListener;
+import com.codepath.apps.restclienttemplate.listeners.EndlessRecyclerViewScrollListener;
 import com.codepath.apps.restclienttemplate.models.Tweet;
 import com.codepath.apps.restclienttemplate.models.TweetDao;
 import com.codepath.apps.restclienttemplate.models.TweetWithUser;
@@ -39,14 +37,14 @@ import org.parceler.Parcels;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import okhttp3.Headers;
 
 public class TimelineActivity extends AppCompatActivity implements ComposeFragment.ComposeFragmentListener {
 
     public static final String TAG = "TimelineActivity"; // TAG for log messages
-    public final int REQUEST_CODE = 20; // Activity change identifier
+    public final int REQUEST_CODE_REPLY = 20; // Activity change identifier
+    public final int REQUEST_CODE_DETAIL = 42;
 
     Long minId; // Member variable that defines the id from the oldest tweet
 
@@ -66,45 +64,37 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
     private EndlessRecyclerViewScrollListener scrollListener;
     private SwipeRefreshLayout swipeContainer;
 
-
-    public void showProgressBar() {
-        // Show progress item
-        if (miActionProgressItem != null){
-            miActionProgressItem.setVisible(true);
-        }
-
-    }
-
-    public void hideProgressBar() {
-        // Hide progress item
-        if (miActionProgressItem != null){
-            miActionProgressItem.setVisible(false);
-        }
-    }
+    // MANDATORY METHODS
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = ActivityTimelineBinding.inflate(getLayoutInflater());
 
+        // Create twitter client with the context of this activity
+        client = TwitterApp.getRestClient(this);
+
+        // Data access object
+        tweetDao = ((TwitterApp) getApplicationContext()).getMyDatabase().tweetDao();
+
+        // View binding code
+        binding = ActivityTimelineBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
 
+        // Set new action bar
         setSupportActionBar(binding.toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        client = TwitterApp.getRestClient(this);
-        tweetDao = ((TwitterApp) getApplicationContext()).getMyDatabase().tweetDao();
-
         // Init the list of tweets
         tweets = new ArrayList<Tweet>();
+        // Init adapter to bind data
         adapter = new TweetsAdapter(this, tweets);
-        // Recycler view setup: layout manager and the adapter
 
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        // RECYCLER VIEW SETUP
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this); // rv manager (works like a linear layout)
         binding.rvTweets.setLayoutManager(linearLayoutManager);
         binding.rvTweets.setAdapter(adapter);
-        binding.rvTweets.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+        binding.rvTweets.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL)); // decoration at the bottom of each row
 
         // Query for existing tweets in DB
         AsyncTask.execute(new Runnable() {
@@ -117,37 +107,32 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
                 adapter.addAll(tweetsFromDB);
             }
         });
+
+        // Populate main timeline (check method)
         populateHomeTimeline();
 
-        swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
+        // USER GENERAL INTERACTIONS (REFRESH AND LOAD MORE)
+
+        // Refresh
+        swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer); // Swipe container view that allows listening to swiping actions
         // Setup refresh listener which triggers new data loading
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                swipeContainer.setRefreshing(false);
-                // Your code to refresh the list here.
-                // Make sure you call swipeContainer.setRefreshing(false)
-                // once the network request has completed successfully.
-                minId = 0L;
-                showProgressBar();
-                populateHomeTimeline();
+                swipeContainer.setRefreshing(false); // ignore refresh icon
+                minId = 0L; // if we set minId to 0, we'll populate with the latest tweets (refer to method on client)
+                showProgressBar(); // change progress bar visibility
+                populateHomeTimeline(); // fill home timeline again
             }
         });
+
         // Configure the refreshing colors
         swipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
                 android.R.color.holo_green_light,
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
 
-        binding.btnCompose.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startComposeFragment();
-//                Intent intent = new Intent(TimelineActivity.this, ComposeActivity.class);
-//                startActivityForResult(intent, REQUEST_CODE);
-            }
-        });
-
+        // Load more
         scrollListener = new EndlessRecyclerViewScrollListener(linearLayoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
@@ -156,30 +141,36 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
                 fetchHomeTimeline();
             }
         };
-        // Adds the scroll listener to RecyclerView
-        binding.rvTweets.addOnScrollListener(scrollListener);
+
+        binding.rvTweets.addOnScrollListener(scrollListener); // add listener to the recycler view
+
+        // Tweet interactions
+        binding.btnCompose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startComposeFragment();
+            }
+        });
 
     }
 
-    private void startComposeFragment() {
-        FragmentManager fm = getSupportFragmentManager();
-        ComposeFragment composeFragment = ComposeFragment.newInstance();
-        composeFragment.show(fm, "activity_compose");
-    }
+    // POPULATE METHODS
 
+    // Method to fill timeline (but it refreshes it)
     private void populateHomeTimeline() {
-        showProgressBar();
-        client.getHomeTimeline(0, new JsonHttpResponseHandler(){
+        showProgressBar(); // as an async action is being run, the progressbar should be displayed
+        client.getHomeTimeline(0, new JsonHttpResponseHandler(){ // client request
             @Override
             public void onSuccess(int statusCode, Headers headers, JSON json) {
                 Log.i(TAG, "onSuccess" + json.toString());
                 JSONArray jsonArray = json.jsonArray;
                 try {
                     final List<Tweet> tweetsFromNetwork = Tweet.fromJsonArray(jsonArray);
-                    adapter.clear();
+                    adapter.clear(); // Restart the adapter
                     tweets.clear();
                     tweets.addAll(tweetsFromNetwork);
                     adapter.notifyDataSetChanged();
+                    // Async query to load tweets into the database
                     AsyncTask.execute(new Runnable() {
                         @Override
                         public void run() {
@@ -197,7 +188,6 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
                     hideProgressBar();
                 }
             }
-
             @Override
             public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
                 Log.e(TAG, "onFailure" + response, throwable);
@@ -205,10 +195,11 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
         });
     }
 
+    // Method to add new tweets to the timeline
     private void fetchHomeTimeline() {
-        showProgressBar();
-        initializeMaxId();
-        client.getHomeTimeline(minId, new JsonHttpResponseHandler(){
+        showProgressBar(); // change progress bar visibility
+        initializeMaxId(); // set the minId values
+        client.getHomeTimeline(minId, new JsonHttpResponseHandler(){ // overloaded method,
 
             @Override
             public void onSuccess(int statusCode, Headers headers, JSON json) {
@@ -217,13 +208,12 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
                 try {
                     tweets.addAll(Tweet.fromJsonArray(jsonArray));
                     adapter.notifyDataSetChanged();
-                    hideProgressBar();
+                    hideProgressBar(); // if it succeed on getting the tweets, hide the progress icon
                 } catch (JSONException e) {
                     Log.e(TAG, "JSON Exception", e);
                     hideProgressBar();
                 }
             }
-
             @Override
             public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
                 Log.e(TAG, "onFailure" + response, throwable);
@@ -231,33 +221,13 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
         });
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        miActionProgressItem = menu.findItem(R.id.miActionProgress);
-        return super.onCreateOptionsMenu(menu);
-    }
+    // FRAGMENT METHODS
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.btnLogout) {
-            onLogoutButton();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    public void onLogoutButton() {
-        client.clearAccessToken();
-        finish();
-    }
-
-    private void initializeMaxId() {
-        minId = Long.parseLong(tweets.get(0).id);
-        for (int i=1; i < tweets.size(); i++) {
-            minId = Math.min(minId, Long.parseLong(tweets.get(i).id));
-        }
-        minId -= 1;
+    // Runs the fragment on top of the activity
+    private void startComposeFragment() {
+        FragmentManager fm = getSupportFragmentManager();
+        ComposeFragment composeFragment = ComposeFragment.newInstance();
+        composeFragment.show(fm, "activity_compose");
     }
 
     @Override
@@ -270,4 +240,67 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
         adapter.notifyItemInserted(0);
         binding.rvTweets.smoothScrollToPosition(0);
     }
+
+    // MENU METHODS
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu); // inflate menu with layout
+        miActionProgressItem = menu.findItem(R.id.miActionProgress); // Progress bar item
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.btnLogout) { // if the logout button is selected, run the logout method
+            onLogoutButton();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    // Boolean methods to  change the visibility of the progress bar so it is not always being displayed
+
+    public void showProgressBar() {
+        // Show progress item
+        if (miActionProgressItem != null){
+            miActionProgressItem.setVisible(true);
+        }
+    }
+    public void hideProgressBar() {
+        // Hide progress item
+        if (miActionProgressItem != null){
+            miActionProgressItem.setVisible(false);
+        }
+    }
+
+    // OTHER METHODS
+
+    // Clear the access token when clicked on logout button (which is part of the menu)
+    public void onLogoutButton() {
+        client.clearAccessToken();
+        finish();
+    }
+    // Assigns value to the minId, this is to define the oldest tweet on the timeline
+    private void initializeMaxId() {
+        minId = Long.parseLong(tweets.get(0).id);
+        for (int i=1; i < tweets.size(); i++) {
+            minId = Math.min(minId, Long.parseLong(tweets.get(i).id));
+        }
+        minId -= 1;
+    }
+
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, @Nullable @org.jetbrains.annotations.Nullable Intent data) {
+//
+//        if(requestCode == REQUEST_CODE_DETAIL && resultCode == RESULT_OK) {
+//            Parcelable tweetParcel = data.getParcelableExtra(Tweet.class.getSimpleName());
+//            Tweet tweet = Parcels.unwrap(tweetParcel);
+//            int tweetPos = data.getExtras().getInt("Position");
+//            tweets.set(tweetPos, tweet);
+//            adapter.notifyDataSetChanged();
+//            binding.rvTweets.smoothScrollToPosition(tweetPos);
+//        }
+//        super.onActivityResult(requestCode, resultCode, data);
+//    }
 }

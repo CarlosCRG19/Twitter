@@ -1,4 +1,4 @@
-package com.codepath.apps.restclienttemplate.ui;
+package com.codepath.apps.restclienttemplate.activities;
 
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.widget.Toast;
 
 import com.codepath.apps.restclienttemplate.R;
 import com.codepath.apps.restclienttemplate.TwitterApp;
@@ -29,6 +30,8 @@ public class LoginActivity extends OAuthLoginActionBarActivity<TwitterClient> {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		// View binding implementation
 		ActivityLoginBinding binding = ActivityLoginBinding.inflate(getLayoutInflater());
 		View view = binding.getRoot();
 		setContentView(view);
@@ -59,25 +62,27 @@ public class LoginActivity extends OAuthLoginActionBarActivity<TwitterClient> {
 	@Override
 	public void onLoginSuccess() {
 		// Call the method that verifies credentials --> user
-		getClient().getCredentials(new JsonHttpResponseHandler() {
-			@Override
-			public void onSuccess(int statusCode, Headers headers, JSON json) {
-				JSONObject userCredentials = json.jsonObject;
-				try {
-					User.currentUser = User.fromJson(userCredentials);
-					Intent i = new Intent(LoginActivity.this, TimelineActivity.class);
-					startActivity(i);
-					Log.d("LoginSuccess", "Success");
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
-			}
-
-			@Override
-			public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
-
-			}
-		});
+		Intent i = new Intent(LoginActivity.this, TimelineActivity.class);
+		startActivity(i);
+//		getClient().getCredentials(new JsonHttpResponseHandler() {
+//			@Override
+//			public void onSuccess(int statusCode, Headers headers, JSON json) {
+//				JSONObject userCredentials = json.jsonObject;
+//				try {
+//					User.currentUser = User.fromJson(userCredentials);
+//
+//					Log.d("LoginSuccess", "Success");
+//				} catch (JSONException e) {
+//					e.printStackTrace();
+//					Log.d( "onSuccess Catch", "Succeeded but: ", e);
+//				}
+//			}
+//
+//			@Override
+//			public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
+//				Log.d("onFailure", "Failed", throwable);
+//			}
+//		});
 	}
 
 	// OAuth authentication flow failed, handle the error

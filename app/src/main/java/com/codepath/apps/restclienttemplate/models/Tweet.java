@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+// Main class to define tweets
 @Parcel
 @Entity(foreignKeys =  @ForeignKey(entity = User.class, parentColumns = "id", childColumns = "userId"))
 public class Tweet {
@@ -74,7 +75,6 @@ public class Tweet {
         tweet.retweeted = jsonObject.getBoolean("retweeted");
         JSONObject entities = jsonObject.getJSONObject("entities");
         if(entities.has("media")) {
-            Media media = Media.fromJson(entities.getJSONArray("media").getJSONObject(0));
             tweet.mediaUrl = entities.getJSONArray("media").getJSONObject(0).getString("media_url_https");
         }
 

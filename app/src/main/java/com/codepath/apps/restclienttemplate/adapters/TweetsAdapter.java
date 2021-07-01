@@ -17,9 +17,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.codepath.apps.restclienttemplate.R;
 import com.codepath.apps.restclienttemplate.TwitterClient;
-import com.codepath.apps.restclienttemplate.ui.ReplyActivity;
+import com.codepath.apps.restclienttemplate.activities.ReplyActivity;
+import com.codepath.apps.restclienttemplate.activities.TimelineActivity;
 import com.codepath.apps.restclienttemplate.models.Tweet;
-import com.codepath.apps.restclienttemplate.ui.TweetDetailActivity;
+import com.codepath.apps.restclienttemplate.activities.TweetDetailActivity;
 import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler;
 
 import org.jetbrains.annotations.NotNull;
@@ -34,6 +35,7 @@ import okhttp3.Headers;
 public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder>{
 
     public static String TAG = "Adapter";
+    public static int REQUEST_CODE = 42;
 
     // Fields
     Context context; // handle to environment
@@ -128,6 +130,8 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
                 Tweet tweet = tweets.get(position);
                 Intent i = new Intent(context, TweetDetailActivity.class);
                 i.putExtra(Tweet.class.getSimpleName(), Parcels.wrap(tweet));
+//                i.putExtra("Position", position);
+                //((TimelineActivity) context).startActivityForResult(i, REQUEST_CODE);
                 context.startActivity(i);
             }
         }
@@ -221,7 +225,7 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
                                 Log.i(TAG, "Failure retweeting: " + response, throwable);
                             }
                         });
-                        tweet.retweeted = false;
+                        tweet.retweeted = true;
                     }
                 }
             });

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingEnd="20dp"
-    tools:context=".ui.ReplyActivity">
+    tools:context=".activities.ReplyActivity">
 
     <ImageView
         android:id="@+id/ivProfileImage"

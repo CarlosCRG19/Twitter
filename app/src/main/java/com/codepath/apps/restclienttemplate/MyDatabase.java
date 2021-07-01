@@ -12,7 +12,7 @@ import com.codepath.apps.restclienttemplate.models.User;
 @Database(entities={SampleModel.class, Tweet.class, User.class}, version=6)
 public abstract class MyDatabase extends RoomDatabase {
     public abstract SampleModelDao sampleModelDao();
-    public abstract TweetDao tweetDao();
+    public abstract TweetDao tweetDao(); // Data Access Object for tweets
 
     // Database name to be used
     public static final String NAME = "MyDataBase";

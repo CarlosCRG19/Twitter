@@ -41,21 +41,26 @@ public class TwitterClient extends OAuthBaseClient {
 				String.format(REST_CALLBACK_URL_TEMPLATE, context.getString(R.string.intent_host),
 						context.getString(R.string.intent_scheme), context.getPackageName(), FALLBACK_URL));
 	}
-	// CHANGE THIS
+
 	// DEFINE METHODS for different API endpoints here
-	public void getHomeTimeline(long max_id, JsonHttpResponseHandler handler) {
+
+	// Method to fill the timeline
+	public void getHomeTimeline(long minId, JsonHttpResponseHandler handler) {
 		String apiUrl = getApiUrl("statuses/home_timeline.json");
 		RequestParams params = new RequestParams();
-		params.put("count", 25);
-		params.put("tweet_mode", "extended");
-		if(max_id != 0) {
-			params.put("max_id", max_id);
+		params.put("count", 25); // get max 25 tweets
+		params.put("tweet_mode", "extended"); // param to get the full tweet text
+		if(minId != 0) {
+			params.put("max_id", minId); // if there is a minId get tweets since that one
 		} else {
 			params.put("since_id", 1);
 		}
 		client.get(apiUrl, params, handler);
 	}
 
+	// TWEET METHODS
+
+	// Simple tweet from home timeline
 	public void postTweet(String body, JsonHttpResponseHandler handler) {
 		String apiUrl = getApiUrl("statuses/update.json");
 		RequestParams params = new RequestParams();
@@ -63,6 +68,7 @@ public class TwitterClient extends OAuthBaseClient {
 		client.post(apiUrl, params, "", handler);
 	}
 
+	// Reply to another tweet (needs id)
 	public void postTweet(String body, String replyToId, JsonHttpResponseHandler handler) {
 		String apiUrl = getApiUrl("statuses/update.json");
 		RequestParams params = new RequestParams();
@@ -71,14 +77,18 @@ public class TwitterClient extends OAuthBaseClient {
 		client.post(apiUrl, params, "", handler);
 	}
 
+	// INTERACTION METHODS
+
+	// Method to unlike or like a tweet (action can be either create or destroy)
 	public void postFavorites(String id, String action, JsonHttpResponseHandler handler) {
-		String url = String.format("favorites/%s.json", action);
+		String url = String.format("favorites/%s.json", action); // format the action
 		String apiUrl = getApiUrl(url);
 		RequestParams params = new RequestParams();
-		params.put("id", id);
+		params.put("id", id); // id of the tweet
 		client.post(apiUrl, params, "", handler);
 	}
 
+	// RT Methods
 	public void postRetweet(String id, JsonHttpResponseHandler handler){
 		String url = String.format("statuses/retweet/%s.json", id);
 		String apiUrl = getApiUrl(url);
@@ -91,11 +101,11 @@ public class TwitterClient extends OAuthBaseClient {
 		String url = String.format("statuses/unretweet/%s.json", id);
 		String apiUrl = getApiUrl(url);
 		RequestParams params = new RequestParams();
-//		params.put("id", id);
+		params.put("id", id);
 		client.post(apiUrl, params, "", handler);
 	}
 
-	// Call the api that verifies credentials
+	// Method to get current user credentials (data used for login)
 	public void getCredentials(JsonHttpResponseHandler handler) {
 		String apiUrl = getApiUrl("account/verify_credentials.json");
 		client.get(apiUrl, handler);
