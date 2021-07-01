@@ -14,8 +14,11 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.codepath.apps.restclienttemplate.R;
 import com.codepath.apps.restclienttemplate.TwitterClient;
+import com.codepath.apps.restclienttemplate.databinding.ActivityReplyBinding;
+import com.codepath.apps.restclienttemplate.databinding.ActivityTimelineBinding;
 import com.codepath.apps.restclienttemplate.models.Tweet;
 import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler;
+import com.google.android.material.textfield.TextInputLayout;
 
 import org.parceler.Parcels;
 
@@ -27,41 +30,38 @@ public class ReplyActivity extends AppCompatActivity {
     public static final int MAX_TWEET_LENGTH = 280;
 
     Tweet tweet;
-    TextView tvScreenName, tvBody;
-    ImageView ivPPStatus, ivPPReply;
-    EditText etReply;
-    Button btnReply;
+    ActivityReplyBinding binding;
 
     TwitterClient client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_reply);
+        binding = ActivityReplyBinding.inflate(getLayoutInflater());
+
+        View view = binding.getRoot();
+        setContentView(view);
 
         client = new TwitterClient(this);
 
         tweet = (Tweet) Parcels.unwrap(getIntent().getParcelableExtra(Tweet.class.getSimpleName()));
 
-        tvScreenName = findViewById(R.id.tvScreenName);
-        tvBody = findViewById(R.id.tvBody);
-        ivPPStatus = findViewById(R.id.ivProfileImage);
+        binding.tvName.setText(tweet.user.name);
 
-        tvScreenName.setText(tweet.user.screenName);
-        tvBody.setText(tweet.body);
+        binding.tvScreenName.setText(" @" + tweet.user.screenName);
+        binding.tvBody.setText(tweet.body);
         Glide.with(this)
                 .load(tweet.user.profileImageUrl)
                 .circleCrop()
-                .into(ivPPStatus);
+                .into(binding.ivProfileImage);
 
-        etReply = findViewById(R.id.etReply);
-        etReply.setText("@" + tweet.user.screenName);
+        binding.etReply.setText("@" + tweet.user.screenName);
+        binding.ilReply.setCounterMaxLength(MAX_TWEET_LENGTH);
 
-        btnReply = findViewById(R.id.btnReply);
-        btnReply.setOnClickListener(new View.OnClickListener() {
+        binding.btnReply.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String replyContent = etReply.getText().toString();
+                String replyContent = binding.etReply.getText().toString();
                 if(replyContent.isEmpty()){
                     Toast.makeText(ReplyActivity.this, "Sorry, your tweet cannot be empty", Toast.LENGTH_LONG).show();
                 } else if(replyContent.length() > MAX_TWEET_LENGTH) {

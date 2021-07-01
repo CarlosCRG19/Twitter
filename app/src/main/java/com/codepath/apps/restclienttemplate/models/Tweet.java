@@ -2,6 +2,13 @@ package com.codepath.apps.restclienttemplate.models;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.ForeignKey;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,15 +21,39 @@ import java.util.List;
 import java.util.Locale;
 
 @Parcel
+@Entity(foreignKeys =  @ForeignKey(entity = User.class, parentColumns = "id", childColumns = "userId"))
 public class Tweet {
 
-    public String body;
+    @ColumnInfo
+    @NonNull
+    @PrimaryKey
     public String id;
+
+    @ColumnInfo
+    public String body;
+
+    @ColumnInfo
     public String createdAt;
+
+    @Ignore
     public User user;
+
+    @ColumnInfo
+    public Long userId;
+
+    @ColumnInfo
     public String timestamp;
-    public Media media;
-    public int favCount, rtCount, rpCount;
+
+    @ColumnInfo
+    public String date;
+
+    @ColumnInfo
+    public String mediaUrl;
+
+    @ColumnInfo
+    public String favCount, rtCount;
+
+    @ColumnInfo
     public boolean favorited, retweeted;
 
     public Tweet(){}
@@ -30,17 +61,21 @@ public class Tweet {
     public static Tweet fromJson(JSONObject jsonObject) throws JSONException {
         Tweet tweet = new Tweet();
         tweet.id = jsonObject.getString("id_str");
-        tweet.body = jsonObject.getString("text");
+        tweet.body = jsonObject.getString("full_text");
         tweet.createdAt = jsonObject.getString("created_at");
-        tweet.user = User.fromJson(jsonObject.getJSONObject("user"));
-        tweet.timestamp = tweet.initializeTimestamp(tweet.createdAt);
-        tweet.favCount = jsonObject.getInt("favorite_count");
-        tweet.rtCount = jsonObject.getInt("retweet_count");
+        User user = User.fromJson(jsonObject.getJSONObject("user"));
+        tweet.user = user;
+        tweet.userId = user.id;
+        tweet.timestamp = tweet.formatTimestamp(tweet.createdAt);
+        tweet.date = tweet.formatDate(tweet.createdAt);
+        tweet.favCount = tweet.formatCount(jsonObject.getInt("favorite_count"));
+        tweet.rtCount = tweet.formatCount(jsonObject.getInt("retweet_count"));
         tweet.favorited = jsonObject.getBoolean("favorited");
         tweet.retweeted = jsonObject.getBoolean("retweeted");
         JSONObject entities = jsonObject.getJSONObject("entities");
         if(entities.has("media")) {
-            tweet.media = Media.fromJson(entities.getJSONArray("media").getJSONObject(0));
+            Media media = Media.fromJson(entities.getJSONArray("media").getJSONObject(0));
+            tweet.mediaUrl = entities.getJSONArray("media").getJSONObject(0).getString("media_url_https");
         }
 
         return tweet;
@@ -54,7 +89,8 @@ public class Tweet {
         return tweets;
     }
 
-    private String initializeTimestamp(String rawJsonDate) {
+    // Formatter method provided by CodePath
+    private String formatTimestamp(String rawJsonDate) {
         final int SECOND_MILLIS = 1000;
         final int MINUTE_MILLIS = 60 * SECOND_MILLIS;
         final int HOUR_MILLIS = 60 * MINUTE_MILLIS;
@@ -92,4 +128,20 @@ public class Tweet {
         return "";
 
     }
+
+    // Method to format date to appear as HH:MM DD M. YYYY
+    private String formatDate(String rawJsonDate) {
+        return rawJsonDate.substring(11, 16) + " " + rawJsonDate.substring(8,10) + " " + rawJsonDate.substring(4,7) + ". " + rawJsonDate.substring(26);
+    }
+
+    // Format count
+    private String formatCount(int count){
+        if(count > 999999) {
+            return String.valueOf(count / 1000000) + "M";
+        } else if (count > 999) {
+            return String.valueOf(count / 1000) + "K";
+        }
+        return String.valueOf(count);
+    }
+
 }

@@ -4,7 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="15dp">
+    android:paddingTop="15dp"
+    android:paddingBottom="15dp"
+    android:paddingLeft="15dp"
+    android:paddingRight="20dp">
 
     <ImageView
         android:id="@+id/ivProfileImage"
@@ -53,11 +56,10 @@
         android:layout_height="18dp"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginStart="114dp"
         android:layout_toEndOf="@+id/tvScreenName"
         android:fontFamily="@font/open_sans_light"
         android:gravity="right"
-        android:text="TextView" />
+        tools:text="an hour ago" />
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardImage"
@@ -82,7 +84,7 @@
         android:id="@+id/btnReply"
         android:background="@drawable/ic_reply"
         android:backgroundTint="@color/medium_gray"
-        android:layout_marginStart="30dp"
+        android:layout_marginStart="20dp"
         android:layout_width="25dp"
         android:layout_height="25dp"
         android:layout_below="@+id/cardImage"
@@ -90,62 +92,47 @@
         android:layout_marginTop="15dp" />
 
     <Button
-        android:id="@+id/btnFavorites"
+        android:id="@+id/btnRetweet"
         android:layout_width="25dp"
         android:layout_height="25dp"
         android:layout_below="@+id/cardImage"
-        android:layout_marginStart="0dp"
+        android:layout_marginStart="55dp"
         android:layout_marginTop="15dp"
-        android:layout_toEndOf="@+id/tvRpCount"
-        android:background="@drawable/ic_vector_heart_stroke" />
-
-    <TextView
-        android:id="@+id/textView3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginStart="-17dp"
-        android:layout_marginTop="430dp"
-        android:layout_marginEnd="2dp"
-        android:layout_toEndOf="@+id/btnFavorites"
-        android:text="TextView" />
+        android:layout_toEndOf="@+id/btnReply"
+        android:background="@drawable/ic_vector_retweet_stroke" />
 
     <TextView
         android:id="@+id/tvRtCount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_marginStart="35dp"
-        android:layout_marginTop="340dp"
-        android:layout_marginEnd="74dp"
+        android:layout_alignTop="@+id/btnRetweet"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="2dp"
         android:layout_toEndOf="@+id/btnRetweet"
-        android:text="TextView" />
+        android:fontFamily="@font/open_sans_semibold"
+        tools:text="123456" />
 
-
-    <TextView
-        android:id="@+id/tvRpCount"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/btnReply"
-        android:layout_marginStart="0dp"
-        android:layout_marginTop="1dp"
-        android:layout_marginBottom="61dp"
-        android:layout_toEndOf="@+id/btnReply"
-        android:text="TextView" />
 
     <Button
-        android:id="@+id/btnRetweet"
+        android:id="@+id/btnFavorites"
         android:layout_width="25dp"
         android:layout_height="25dp"
         android:layout_below="@+id/cardImage"
-        android:layout_marginStart="4dp"
+        android:layout_marginStart="55dp"
         android:layout_marginTop="15dp"
-        android:layout_marginEnd="9dp"
-        android:layout_toEndOf="@+id/tvRpCount"
-        android:background="@drawable/ic_vector_retweet_stroke" />
+        android:layout_toEndOf="@+id/tvRtCount"
+        android:background="@drawable/ic_vector_heart_stroke" />
 
-
+    <TextView
+        android:id="@+id/tvFavCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="2dp"
+        android:fontFamily="@font/open_sans_semibold"
+        android:layout_alignTop="@+id/btnFavorites"
+        android:layout_toEndOf="@+id/btnFavorites"
+        tools:text="121421" />
 
 
 </RelativeLayout>

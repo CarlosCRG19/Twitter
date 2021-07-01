@@ -16,6 +16,7 @@ import androidx.fragment.app.DialogFragment;
 import com.codepath.apps.restclienttemplate.R;
 import com.codepath.apps.restclienttemplate.TwitterApp;
 import com.codepath.apps.restclienttemplate.TwitterClient;
+import com.codepath.apps.restclienttemplate.databinding.ActivityComposeBinding;
 import com.codepath.apps.restclienttemplate.models.Tweet;
 import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler;
 import com.google.android.material.textfield.TextInputLayout;
@@ -29,11 +30,9 @@ public class ComposeFragment extends DialogFragment {
     public static final String TAG="ComposeActivity";
     public static final int MAX_TWEET_LENGTH = 280;
 
-    EditText etCompose;
-    TextInputLayout ilCharCount;
-    Button btnCompose;
-
     TwitterClient client;
+
+    ActivityComposeBinding binding;
 
     public interface  ComposeFragmentListener {
         void onFinishCompose(Tweet tweet);
@@ -50,7 +49,9 @@ public class ComposeFragment extends DialogFragment {
     // Mandatory methods to create the fragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return getActivity().getLayoutInflater().inflate(R.layout.activity_compose, container);
+        binding = ActivityComposeBinding.inflate(getLayoutInflater(), container, false);
+        View view = binding.getRoot();
+        return view;
     }
 
     @Override
@@ -59,16 +60,12 @@ public class ComposeFragment extends DialogFragment {
 
         client = TwitterApp.getRestClient(getActivity());
 
-        etCompose = view.findViewById(R.id.etCompose);
-        btnCompose = view.findViewById(R.id.btnCompose);
+        binding.inputLayout.setCounterMaxLength(MAX_TWEET_LENGTH);
 
-        ilCharCount = view.findViewById(R.id.inputLayout);
-        ilCharCount.setCounterMaxLength(MAX_TWEET_LENGTH);
-
-        btnCompose.setOnClickListener(new View.OnClickListener() {
+        binding.btnCompose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String tweetContent = etCompose.getText().toString();
+                String tweetContent = binding.etCompose.getText().toString();
                 if(tweetContent.isEmpty()){
                     Toast.makeText(getActivity(), "Sorry, your tweet cannot be empty", Toast.LENGTH_LONG).show();
                 } else if(tweetContent.length() > MAX_TWEET_LENGTH) {

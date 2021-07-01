@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingEnd="20dp"
     tools:context=".ui.ReplyActivity">
 
     <ImageView
@@ -17,12 +18,23 @@
         tools:srcCompat="@tools:sample/avatars" />
 
     <TextView
-        android:id="@+id/tvScreenName"
+        android:id="@+id/tvName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/ivProfileImage"
+        android:layout_marginStart="15dp"
         android:layout_toEndOf="@+id/ivProfileImage"
-        android:layout_marginStart="20dp"
+        android:fontFamily="@font/open_sans_semibold"
+        android:text="TextView"
+        android:textColor="@android:color/black" />
+
+    <TextView
+        android:id="@+id/tvScreenName"
+        android:layout_width="wrap_content"
+        android:layout_alignTop="@+id/ivProfileImage"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/tvName"
+        android:fontFamily="@font/open_sans_light"
         android:text="TextView" />
 
     <TextView
@@ -30,31 +42,47 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/tvScreenName"
-        android:layout_alignStart="@+id/tvScreenName"
-        android:layout_marginTop="10dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="5dp"
         android:layout_toEndOf="@+id/ivProfileImage"
-        android:textColor="@android:color/darker_gray"
-        android:text="TextView" />
+        android:autoLink="all"
+        android:fontFamily="@font/open_sans_light"
+        android:text="TextView"
+        android:textColor="@android:color/black" />
 
-    <EditText
-        android:id="@+id/etReply"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/ilReply"
         android:layout_below="@+id/tvBody"
-        android:layout_alignParentStart="true"
-        android:layout_marginStart="88dp"
-        android:layout_marginTop="11dp"
-        android:ems="10"
-        android:gravity="start|top"
-        android:inputType="textMultiLine"/>
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_alignStart="@+id/tvBody"
+        app:counterEnabled="true"
+        app:counterMaxLength="10">
+        <EditText
+            android:id="@+id/etReply"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:gravity="start|top"
+            android:inputType="textMultiLine"
+            android:minLines="5"
+            android:backgroundTint="@color/twitter_blue"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_editor_absoluteX="48dp" />
+    </com.google.android.material.textfield.TextInputLayout>
 
     <Button
         android:id="@+id/btnReply"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginStart="95dp"
-        android:layout_marginTop="129dp"
-        android:text="Button" />
+        android:layout_alignStart="@+id/ilReply"
+        android:layout_below="@+id/ilReply"
+        android:background="@drawable/btn_tweet_bg"
+        android:text="Tweet"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:textSize="17sp"  />
 </RelativeLayout>

@@ -4,5 +4,5 @@
     android:shape="ring"
     android:thicknessRatio="2"
     android:useLevel="false" >
-    <solid android:color="@color/dark_blue" />
+    <solid android:color="@color/twitter_blue_30" />
 </shape>

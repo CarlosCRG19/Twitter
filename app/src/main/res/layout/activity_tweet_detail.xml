@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ui.TweetDetailActivity">
+    android:layout_height="wrap_content"
+    android:padding="15dp">
 
     <ImageView
         android:id="@+id/ivProfileImage"
@@ -15,12 +15,23 @@
         tools:srcCompat="@tools:sample/avatars" />
 
     <TextView
-        android:id="@+id/tvScreenName"
+        android:id="@+id/tvName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_marginStart="12dp"
+        android:layout_marginStart="15dp"
         android:layout_toEndOf="@+id/ivProfileImage"
+        android:fontFamily="@font/open_sans_semibold"
+        android:text="TextView"
+        android:textColor="@android:color/black" />
+
+    <TextView
+        android:id="@+id/tvScreenName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/tvName"
+        android:layout_below="@+id/tvName"
+        android:fontFamily="@font/open_sans_light"
         android:text="TextView" />
 
     <TextView
@@ -28,22 +39,24 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/tvScreenName"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="2dp"
-        android:autoLink="all"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="5dp"
         android:layout_toEndOf="@+id/ivProfileImage"
-        android:text="TextView" />
+        android:autoLink="all"
+        android:fontFamily="@font/open_sans_light"
+        android:text="TextView"
+        android:textColor="@android:color/black" />
 
     <TextView
-        android:id="@+id/tvTimestamp"
-        android:layout_width="match_parent"
+        android:id="@+id/tvDate"
+        android:layout_width="wrap_content"
         android:layout_height="18dp"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginStart="114dp"
-        android:layout_toEndOf="@+id/tvScreenName"
+        android:layout_below="@id/cardImage"
+        android:layout_alignStart="@id/tvName"
+        android:layout_marginTop="2dp"
+        android:fontFamily="@font/open_sans_light"
         android:gravity="right"
-        android:text="TextView" />
+        android:text="an hour ago" />
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardImage"
@@ -51,10 +64,9 @@
         android:layout_height="180dp"
         android:layout_below="@+id/tvBody"
         app:cardCornerRadius="8dp"
-        android:layout_margin="5dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="15dp"
         android:layout_alignStart="@+id/tvBody"
-        android:layout_toEndOf="@+id/tvTimestamp">
+        android:layout_toEndOf="@+id/tvDate">
 
         <ImageView
             android:id="@+id/ivMedia"
@@ -64,5 +76,60 @@
             android:scaleType="centerCrop"
             tools:srcCompat="@tools:sample/avatars" />
     </androidx.cardview.widget.CardView>
+
+    <Button
+        android:id="@+id/btnReply"
+        android:background="@drawable/ic_reply"
+        android:backgroundTint="@color/medium_gray"
+        android:layout_marginStart="20dp"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_below="@+id/cardImage"
+        android:layout_alignStart="@+id/cardImage"
+        android:layout_marginTop="40dp" />
+
+    <Button
+        android:id="@+id/btnRetweet"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_below="@+id/cardImage"
+        android:layout_marginStart="55dp"
+        android:layout_marginTop="40dp"
+        android:layout_toEndOf="@+id/btnReply"
+        android:background="@drawable/ic_vector_retweet_stroke" />
+
+    <TextView
+        android:id="@+id/tvRtCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/btnRetweet"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="2dp"
+        android:layout_toEndOf="@+id/btnRetweet"
+        android:fontFamily="@font/open_sans_semibold"
+        tools:text="123456" />
+
+
+    <Button
+        android:id="@+id/btnFavorites"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_below="@+id/cardImage"
+        android:layout_marginStart="55dp"
+        android:layout_marginTop="40dp"
+        android:layout_toEndOf="@+id/tvRtCount"
+        android:background="@drawable/ic_vector_heart_stroke" />
+
+    <TextView
+        android:id="@+id/tvFavCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="2dp"
+        android:fontFamily="@font/open_sans_semibold"
+        android:layout_alignTop="@+id/btnFavorites"
+        android:layout_toEndOf="@+id/btnFavorites"
+        tools:text="121421" />
+
 
 </RelativeLayout>

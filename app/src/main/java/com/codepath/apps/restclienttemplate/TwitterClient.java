@@ -47,6 +47,7 @@ public class TwitterClient extends OAuthBaseClient {
 		String apiUrl = getApiUrl("statuses/home_timeline.json");
 		RequestParams params = new RequestParams();
 		params.put("count", 25);
+		params.put("tweet_mode", "extended");
 		if(max_id != 0) {
 			params.put("max_id", max_id);
 		} else {
@@ -79,15 +80,19 @@ public class TwitterClient extends OAuthBaseClient {
 	}
 
 	public void postRetweet(String id, JsonHttpResponseHandler handler){
-		String url = String.format("statutes/retweet/%s.json", id);
+		String url = String.format("statuses/retweet/%s.json", id);
 		String apiUrl = getApiUrl(url);
-		client.post(apiUrl, handler);
+		RequestParams params = new RequestParams();
+		params.put("id", id);
+		client.post(apiUrl, params, "", handler);
 	}
 
 	public void postUnretweet(String id, JsonHttpResponseHandler handler){
-		String url = String.format("statutes/unretweet/%s.json", id);
+		String url = String.format("statuses/unretweet/%s.json", id);
 		String apiUrl = getApiUrl(url);
-		client.post(apiUrl, handler);
+		RequestParams params = new RequestParams();
+//		params.put("id", id);
+		client.post(apiUrl, params, "", handler);
 	}
 
 	// Call the api that verifies credentials

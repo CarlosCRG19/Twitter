@@ -1,6 +1,7 @@
 package com.codepath.apps.restclienttemplate.ui;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentManager;
@@ -10,6 +11,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.content.Intent;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -21,9 +24,13 @@ import com.codepath.apps.restclienttemplate.R;
 import com.codepath.apps.restclienttemplate.TwitterApp;
 import com.codepath.apps.restclienttemplate.TwitterClient;
 import com.codepath.apps.restclienttemplate.adapters.TweetsAdapter;
+import com.codepath.apps.restclienttemplate.databinding.ActivityTimelineBinding;
 import com.codepath.apps.restclienttemplate.fragments.ComposeFragment;
-import com.codepath.apps.restclienttemplate.models.EndlessRecyclerViewScrollListener;
+import com.codepath.apps.restclienttemplate.EndlessRecyclerViewScrollListener;
 import com.codepath.apps.restclienttemplate.models.Tweet;
+import com.codepath.apps.restclienttemplate.models.TweetDao;
+import com.codepath.apps.restclienttemplate.models.TweetWithUser;
+import com.codepath.apps.restclienttemplate.models.User;
 import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler;
 
 import org.json.JSONArray;
@@ -32,58 +39,84 @@ import org.parceler.Parcels;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import okhttp3.Headers;
 
 public class TimelineActivity extends AppCompatActivity implements ComposeFragment.ComposeFragmentListener {
 
-    public static final String TAG = "TimelineActivity";
-    public final int REQUEST_CODE = 20;
+    public static final String TAG = "TimelineActivity"; // TAG for log messages
+    public final int REQUEST_CODE = 20; // Activity change identifier
 
-    TwitterClient client;
-    RecyclerView rvTweets;
-    List<Tweet> tweets;
-    TweetsAdapter adapter;
-    Button btnCompose;
+    Long minId; // Member variable that defines the id from the oldest tweet
 
-    Long max_id;
+    TweetDao tweetDao; // Data Access Object
+
+    List<Tweet> tweets; // Member variable to be accessed by inner classes
+
+    TwitterClient client; // Twitter client that makes requests
+
+    TweetsAdapter adapter; // binds the tweet data to a ViewHolder
+
+    MenuItem miActionProgressItem; // Progress icon from menu
+
+    ActivityTimelineBinding binding; // View binding implementation
+
+    // Helpers
     private EndlessRecyclerViewScrollListener scrollListener;
-
     private SwipeRefreshLayout swipeContainer;
-    MenuItem miActionProgressItem;
+
 
     public void showProgressBar() {
         // Show progress item
-        miActionProgressItem.setVisible(true);
+        if (miActionProgressItem != null){
+            miActionProgressItem.setVisible(true);
+        }
+
     }
 
     public void hideProgressBar() {
         // Hide progress item
-        miActionProgressItem.setVisible(false);
+        if (miActionProgressItem != null){
+            miActionProgressItem.setVisible(false);
+        }
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_timeline);
+        binding = ActivityTimelineBinding.inflate(getLayoutInflater());
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        View view = binding.getRoot();
+        setContentView(view);
+
+        setSupportActionBar(binding.toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         client = TwitterApp.getRestClient(this);
+        tweetDao = ((TwitterApp) getApplicationContext()).getMyDatabase().tweetDao();
 
-        // Find the rv
-        rvTweets = (RecyclerView) findViewById(R.id.rvTweets);
         // Init the list of tweets
         tweets = new ArrayList<Tweet>();
         adapter = new TweetsAdapter(this, tweets);
         // Recycler view setup: layout manager and the adapter
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        rvTweets.setLayoutManager(linearLayoutManager);
-        rvTweets.setAdapter(adapter);
-        rvTweets.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+        binding.rvTweets.setLayoutManager(linearLayoutManager);
+        binding.rvTweets.setAdapter(adapter);
+        binding.rvTweets.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+
+        // Query for existing tweets in DB
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                Log.i(TAG, "Showing data from DB");
+                List<TweetWithUser> tweetWithUsers = tweetDao.recentItem(); // CHECK THIS
+                List<Tweet> tweetsFromDB = TweetWithUser.getTweetList(tweetWithUsers);
+                adapter.clear();
+                adapter.addAll(tweetsFromDB);
+            }
+        });
         populateHomeTimeline();
 
         swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
@@ -95,7 +128,7 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
                 // Your code to refresh the list here.
                 // Make sure you call swipeContainer.setRefreshing(false)
                 // once the network request has completed successfully.
-                max_id = 0L;
+                minId = 0L;
                 showProgressBar();
                 populateHomeTimeline();
             }
@@ -106,8 +139,7 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
 
-        btnCompose = findViewById(R.id.btnCompose);
-        btnCompose.setOnClickListener(new View.OnClickListener() {
+        binding.btnCompose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startComposeFragment();
@@ -125,7 +157,7 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
             }
         };
         // Adds the scroll listener to RecyclerView
-        rvTweets.addOnScrollListener(scrollListener);
+        binding.rvTweets.addOnScrollListener(scrollListener);
 
     }
 
@@ -136,16 +168,29 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
     }
 
     private void populateHomeTimeline() {
+        showProgressBar();
         client.getHomeTimeline(0, new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Headers headers, JSON json) {
                 Log.i(TAG, "onSuccess" + json.toString());
                 JSONArray jsonArray = json.jsonArray;
                 try {
+                    final List<Tweet> tweetsFromNetwork = Tweet.fromJsonArray(jsonArray);
                     adapter.clear();
                     tweets.clear();
-                    tweets.addAll(Tweet.fromJsonArray(jsonArray));
+                    tweets.addAll(tweetsFromNetwork);
                     adapter.notifyDataSetChanged();
+                    AsyncTask.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.i(TAG, "Saving data into database");
+                            // insert users first
+                            List<User> usersFromNetwork = User.fromJsonTweetArray(tweetsFromNetwork);
+                            tweetDao.insertModel(usersFromNetwork.toArray(new User[0]));
+                            // insert tweets next
+                            tweetDao.insertModel(tweetsFromNetwork.toArray(new Tweet[0]));
+                        }
+                    });
                     hideProgressBar();
                 } catch (JSONException e) {
                     Log.e(TAG, "JSON Exception", e);
@@ -163,7 +208,7 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
     private void fetchHomeTimeline() {
         showProgressBar();
         initializeMaxId();
-        client.getHomeTimeline(max_id, new JsonHttpResponseHandler(){
+        client.getHomeTimeline(minId, new JsonHttpResponseHandler(){
 
             @Override
             public void onSuccess(int statusCode, Headers headers, JSON json) {
@@ -190,7 +235,6 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         miActionProgressItem = menu.findItem(R.id.miActionProgress);
-        showProgressBar();
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -203,31 +247,17 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable @org.jetbrains.annotations.Nullable Intent data) {
-        if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
-            // Get data from intent (tweet object)
-            Tweet tweet = Parcels.unwrap(data.getParcelableExtra("tweet"));
-            // Update RV with the tweet
-            tweets.add(0, tweet);
-            // Update Adapter
-            adapter.notifyItemInserted(0);
-            rvTweets.smoothScrollToPosition(0);
-        }
-        super.onActivityResult(requestCode, resultCode, data);
-    }
-
     public void onLogoutButton() {
         client.clearAccessToken();
         finish();
     }
 
     private void initializeMaxId() {
-        max_id = Long.parseLong(tweets.get(0).id);
+        minId = Long.parseLong(tweets.get(0).id);
         for (int i=1; i < tweets.size(); i++) {
-            max_id = Math.min(max_id, Long.parseLong(tweets.get(i).id));
+            minId = Math.min(minId, Long.parseLong(tweets.get(i).id));
         }
-        max_id -= 1;
+        minId -= 1;
     }
 
     @Override
@@ -238,6 +268,6 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
         tweets.add(0, newTweet);
         // Update Adapter
         adapter.notifyItemInserted(0);
-        rvTweets.smoothScrollToPosition(0);
+        binding.rvTweets.smoothScrollToPosition(0);
     }
 }
