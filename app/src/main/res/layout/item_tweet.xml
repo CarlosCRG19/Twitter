@@ -80,32 +80,72 @@
 
     <Button
         android:id="@+id/btnReply"
-        android:background="@drawable/ic_favorite"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:background="@drawable/ic_reply"
+        android:backgroundTint="@color/medium_gray"
+        android:layout_marginStart="30dp"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
         android:layout_below="@+id/cardImage"
         android:layout_alignStart="@+id/cardImage"
         android:layout_marginTop="15dp" />
 
     <Button
         android:id="@+id/btnFavorites"
-        android:background="@drawable/ic_favorite"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
         android:layout_below="@+id/cardImage"
-        android:layout_marginStart="40dp"
+        android:layout_marginStart="0dp"
         android:layout_marginTop="15dp"
-        android:layout_toEndOf="@+id/btnReply" />
+        android:layout_toEndOf="@+id/tvRpCount"
+        android:background="@drawable/ic_vector_heart_stroke" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="-17dp"
+        android:layout_marginTop="430dp"
+        android:layout_marginEnd="2dp"
+        android:layout_toEndOf="@+id/btnFavorites"
+        android:text="TextView" />
+
+    <TextView
+        android:id="@+id/tvRtCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="35dp"
+        android:layout_marginTop="340dp"
+        android:layout_marginEnd="74dp"
+        android:layout_toEndOf="@+id/btnRetweet"
+        android:text="TextView" />
+
+
+    <TextView
+        android:id="@+id/tvRpCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/btnReply"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginBottom="61dp"
+        android:layout_toEndOf="@+id/btnReply"
+        android:text="TextView" />
 
     <Button
         android:id="@+id/btnRetweet"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:background="@drawable/ic_vector_retweet_stroke"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
         android:layout_below="@+id/cardImage"
-        android:layout_marginStart="40dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="15dp"
         android:layout_marginEnd="9dp"
-        android:layout_toEndOf="@+id/btnFavorites" />
+        android:layout_toEndOf="@+id/tvRpCount"
+        android:background="@drawable/ic_vector_retweet_stroke" />
+
+
+
 
 </RelativeLayout>

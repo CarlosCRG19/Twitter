@@ -6,6 +6,8 @@
             res/values-vXX/styles.xml, while customizations related to
             backward-compatibility can go here.
         -->
+        <item name="colorPrimaryVariant">@color/dark_blue</item>
+        <item name="android:statusBarColor">@color/dark_blue</item>
     </style>
 
     <!-- Application theme. -->

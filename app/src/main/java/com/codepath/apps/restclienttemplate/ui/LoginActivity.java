@@ -12,7 +12,14 @@ import com.codepath.apps.restclienttemplate.TwitterApp;
 import com.codepath.apps.restclienttemplate.TwitterClient;
 import com.codepath.apps.restclienttemplate.models.SampleModel;
 import com.codepath.apps.restclienttemplate.models.SampleModelDao;
+import com.codepath.apps.restclienttemplate.models.User;
+import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler;
 import com.codepath.oauth.OAuthLoginActionBarActivity;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import okhttp3.Headers;
 
 public class LoginActivity extends OAuthLoginActionBarActivity<TwitterClient> {
 
@@ -48,9 +55,26 @@ public class LoginActivity extends OAuthLoginActionBarActivity<TwitterClient> {
 	// i.e Display application "homepage"
 	@Override
 	public void onLoginSuccess() {
-		Intent i = new Intent(this, TimelineActivity.class);
-		startActivity(i);
-		Log.d("LoginSuccess", "Success");
+		// Call the method that verifies credentials --> user
+		getClient().getCredentials(new JsonHttpResponseHandler() {
+			@Override
+			public void onSuccess(int statusCode, Headers headers, JSON json) {
+				JSONObject userCredentials = json.jsonObject;
+				try {
+					User.currentUser = User.fromJson(userCredentials);
+					Intent i = new Intent(LoginActivity.this, TimelineActivity.class);
+					startActivity(i);
+					Log.d("LoginSuccess", "Success");
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+			}
+
+			@Override
+			public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
+
+			}
+		});
 	}
 
 	// OAuth authentication flow failed, handle the error

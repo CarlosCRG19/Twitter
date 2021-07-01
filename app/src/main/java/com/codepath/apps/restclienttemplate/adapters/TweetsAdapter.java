@@ -81,7 +81,7 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
         TextView tvName, tvScreenName;
         TextView tvTimestamp;
         ImageView ivMedia;
-        Button btnReply, btnFavorites;
+        Button btnReply, btnFavorites, btnRetweet;
         CardView cvMedia;
 
         TwitterClient client = new TwitterClient(context);
@@ -113,13 +113,29 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
                 }
             });
 
+
             btnFavorites = itemView.findViewById(R.id.btnFavorites);
+
             btnFavorites.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     int position = getAdapterPosition();
                     Tweet tweet = tweets.get(position);
-                    if(favoritesAction) {
+                    if(tweet.favorited) {
+                        client.postFavorites(tweet.id, "destroy", new JsonHttpResponseHandler() {
+                            @Override
+                            public void onSuccess(int statusCode, Headers headers, JSON json) {
+                                Log.i("Favorites", "successfully liked the tweet");
+                            }
+
+                            @Override
+                            public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
+                                Log.i("Favorites", "failure liking the tweet");
+                            }
+                        });
+                        tweet.favorited = false;
+                        btnFavorites.setBackgroundResource(R.drawable.ic_vector_heart_stroke);
+                    } else {
                         client.postFavorites(tweet.id, "create", new JsonHttpResponseHandler() {
                             @Override
                             public void onSuccess(int statusCode, Headers headers, JSON json) {
@@ -131,22 +147,46 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
                                 Log.i("Favorites", "failure liking the tweet");
                             }
                         });
-                        favoritesAction = false;
+                        tweet.favorited = true;
                         btnFavorites.setBackgroundResource(R.drawable.ic_vector_heart);
-                    } else {
-                        client.postFavorites(tweet.id, "create", new JsonHttpResponseHandler() {
+                    }
+                }
+            });
+
+            btnRetweet = itemView.findViewById(R.id.btnRetweet);
+            btnRetweet.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int position = getAdapterPosition();
+                    Tweet tweet = tweets.get(position);
+                    if(tweet.retweeted) {
+                        client.postRetweet(tweet.id, new JsonHttpResponseHandler() {
                             @Override
                             public void onSuccess(int statusCode, Headers headers, JSON json) {
-                                Log.i("Favorites", "successfully disliked the tweet");
+                                Log.i("Retweet", "successfully retweeted the tweet");
                             }
 
                             @Override
                             public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
-                                Log.i("Favorites", "failure disliking the tweet");
+                                Log.i("Retweet", "failure retweeting", throwable);
                             }
                         });
-                        favoritesAction = true;
-                        btnFavorites.setBackgroundResource(R.drawable.ic_vector_heart_stroke);
+                        tweet.retweeted = false;
+                        btnRetweet.setBackgroundResource(R.drawable.ic_vector_retweet_stroke);
+                    } else {
+                        client.postUnretweet(tweet.id, new JsonHttpResponseHandler() {
+                            @Override
+                            public void onSuccess(int statusCode, Headers headers, JSON json) {
+                                Log.i("Unretweet", "successfully retweeted the tweet");
+                            }
+
+                            @Override
+                            public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
+                                Log.i("Unretweet", "failure retweeting", throwable);
+                            }
+                        });
+                        tweet.retweeted = false;
+                        btnRetweet.setBackgroundResource(R.drawable.ic_vector_retweet);
                     }
                 }
             });
@@ -168,8 +208,15 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
                 cvMedia.setVisibility(View.GONE);
             }
 
+            if(tweet.favorited) {
+                btnFavorites.setBackgroundResource(R.drawable.ic_vector_heart);
+            }
+            if(tweet.retweeted) {
+                btnRetweet.setBackgroundResource(R.drawable.ic_vector_retweet);
+            }
+            tvName.setText(tweet.user.name);
             tvBody.setText(tweet.body);
-            tvScreenName.setText(tweet.user.screenName);
+            tvScreenName.setText(" @" + tweet.user.screenName);
             tvTimestamp.setText(tweet.timestamp);
             Glide.with(context)
                     .load(tweet.user.profileImageUrl)

@@ -15,12 +15,15 @@ import java.util.Locale;
 
 @Parcel
 public class Tweet {
+
     public String body;
     public String id;
     public String createdAt;
     public User user;
     public String timestamp;
     public Media media;
+    public int favCount, rtCount, rpCount;
+    public boolean favorited, retweeted;
 
     public Tweet(){}
 
@@ -31,7 +34,10 @@ public class Tweet {
         tweet.createdAt = jsonObject.getString("created_at");
         tweet.user = User.fromJson(jsonObject.getJSONObject("user"));
         tweet.timestamp = tweet.initializeTimestamp(tweet.createdAt);
-
+        tweet.favCount = jsonObject.getInt("favorite_count");
+        tweet.rtCount = jsonObject.getInt("retweet_count");
+        tweet.favorited = jsonObject.getBoolean("favorited");
+        tweet.retweeted = jsonObject.getBoolean("retweeted");
         JSONObject entities = jsonObject.getJSONObject("entities");
         if(entities.has("media")) {
             tweet.media = Media.fromJson(entities.getJSONArray("media").getJSONObject(0));
