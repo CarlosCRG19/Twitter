@@ -43,8 +43,7 @@ import okhttp3.Headers;
 public class TimelineActivity extends AppCompatActivity implements ComposeFragment.ComposeFragmentListener {
 
     public static final String TAG = "TimelineActivity"; // TAG for log messages
-    public final int REQUEST_CODE_REPLY = 20; // Activity change identifier
-    public final int REQUEST_CODE_DETAIL = 42;
+    public final int REQUEST_CODE_DETAIL = 42; // Activity change identifier
 
     Long minId; // Member variable that defines the id from the oldest tweet
 
@@ -278,8 +277,14 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
 
     // Clear the access token when clicked on logout button (which is part of the menu)
     public void onLogoutButton() {
-        client.clearAccessToken();
-        finish();
+        // forget who's logged in
+        TwitterApp.getRestClient(this).clearAccessToken();
+
+        // navigate backwards to Login screen
+        Intent i = new Intent(this, LoginActivity.class);
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // this makes sure the Back button won't work
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // same as above
+        startActivity(i);
     }
     // Assigns value to the minId, this is to define the oldest tweet on the timeline
     private void initializeMaxId() {
@@ -290,17 +295,17 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
         minId -= 1;
     }
 
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, @Nullable @org.jetbrains.annotations.Nullable Intent data) {
-//
-//        if(requestCode == REQUEST_CODE_DETAIL && resultCode == RESULT_OK) {
-//            Parcelable tweetParcel = data.getParcelableExtra(Tweet.class.getSimpleName());
-//            Tweet tweet = Parcels.unwrap(tweetParcel);
-//            int tweetPos = data.getExtras().getInt("Position");
-//            tweets.set(tweetPos, tweet);
-//            adapter.notifyDataSetChanged();
-//            binding.rvTweets.smoothScrollToPosition(tweetPos);
-//        }
-//        super.onActivityResult(requestCode, resultCode, data);
-//    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable @org.jetbrains.annotations.Nullable Intent data) {
+
+        if(requestCode == REQUEST_CODE_DETAIL && resultCode == RESULT_OK) {
+            Log.i("FINISHED ACT", "Yes, youre getting to your activity");
+            Tweet tweet = Parcels.unwrap(data.getParcelableExtra(Tweet.class.getSimpleName()));
+            int tweetPos = data.getExtras().getInt("Position");
+            tweets.set(tweetPos, tweet);
+            adapter.notifyItemChanged(tweetPos);
+            binding.rvTweets.smoothScrollToPosition(tweetPos);
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
 }

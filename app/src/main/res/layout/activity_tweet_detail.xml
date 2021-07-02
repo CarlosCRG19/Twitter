@@ -53,7 +53,7 @@
         android:layout_height="18dp"
         android:layout_below="@id/cardImage"
         android:layout_alignStart="@id/tvName"
-        android:layout_marginTop="2dp"
+        android:layout_marginTop="5dp"
         android:fontFamily="@font/open_sans_light"
         android:gravity="right"
         android:text="an hour ago" />

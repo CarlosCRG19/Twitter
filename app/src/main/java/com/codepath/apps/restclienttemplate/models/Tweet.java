@@ -144,4 +144,61 @@ public class Tweet {
         return String.valueOf(count);
     }
 
+    private boolean isNumeric(String string) {
+        int intValue;
+
+        if(string == null || string.equals("")) {
+            return false;
+        }
+
+        try {
+            intValue = Integer.parseInt(string);
+            return true;
+        } catch (NumberFormatException e) {
+        }
+        return false;
+    }
+
+    public void sumFav() {
+        boolean isNum = isNumeric(this.favCount);
+        if(isNum){
+            int intFavCount = Integer.parseInt(this.favCount);
+            if(intFavCount < 999){
+                this.favCount = String.valueOf(intFavCount + 1);
+            } else if (intFavCount == 999) {
+                this.favCount = "1K";
+            }
+        }
+    }
+
+    public void subFav() {
+        boolean isNum = isNumeric(this.favCount);
+        if(isNum){
+            int intFavCount = Integer.parseInt(this.favCount);
+            this.favCount = String.valueOf(intFavCount - 1);
+        } else if (this.favCount == "1K") {
+            this.favCount = "999";
+        }
+    }
+
+    public void sumRt() {
+        boolean isNum = isNumeric(this.rtCount);
+        if(isNum){
+            int intRtCount = Integer.parseInt(this.rtCount);
+            if(intRtCount < 999){
+                this.rtCount = String.valueOf(intRtCount + 1);
+            } else if (intRtCount == 999) {
+                this.rtCount = "1K";
+            }
+        }
+    }
+
+    public void subRt() {
+        boolean isNum = isNumeric(this.rtCount);
+        if(isNum){
+            int intRtCount = Integer.parseInt(this.rtCount);
+            this.rtCount = String.valueOf(intRtCount - 1);
+        }
+    }
+
 }

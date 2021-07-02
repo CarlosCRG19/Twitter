@@ -22,7 +22,7 @@ import okhttp3.Headers;
 public class TweetDetailActivity extends AppCompatActivity {
 
     // ADAPTER POSITION
-    // public final int POSITION = Parcels.unwrap(getIntent().getParcelableExtra("Position"));
+    public int POSITION;
 
     // Static variables
     public static String TAG = "ReplyActivity"; // Tag for log messages
@@ -38,6 +38,8 @@ public class TweetDetailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        POSITION = getIntent().getIntExtra("Position", 42);
 
         // Inflate via view binding
         binding = ActivityTweetDetailBinding.inflate(getLayoutInflater());
@@ -103,6 +105,8 @@ public class TweetDetailActivity extends AppCompatActivity {
                         public void onSuccess(int statusCode, Headers headers, JSON json) {
                             Log.i(TAG, "Successfully retweeted the tweet");
                             binding.btnRetweet.setBackgroundResource(R.drawable.ic_vector_retweet_stroke); // change bg to regular stroke
+                            tweet.subRt();
+                            binding.tvRtCount.setText(tweet.rtCount);
                         }
                         @Override
                         public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
@@ -120,6 +124,8 @@ public class TweetDetailActivity extends AppCompatActivity {
                         public void onSuccess(int statusCode, Headers headers, JSON json) {
                             Log.i(TAG, "Successfully retweeted the tweet");
                             binding.btnRetweet.setBackgroundResource(R.drawable.ic_vector_retweet);
+                            tweet.sumRt();
+                            binding.tvRtCount.setText(tweet.rtCount);
                         }
                         @Override
                         public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
@@ -142,6 +148,8 @@ public class TweetDetailActivity extends AppCompatActivity {
                         public void onSuccess(int statusCode, Headers headers, JSON json) {
                             Log.i(TAG, "Successfully unliked the tweet");
                             binding.btnFavorites.setBackgroundResource(R.drawable.ic_vector_heart_stroke);
+                            tweet.subFav();
+                            binding.tvFavCount.setText(tweet.favCount);
                         }
                         @Override
                         public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
@@ -159,6 +167,8 @@ public class TweetDetailActivity extends AppCompatActivity {
                         public void onSuccess(int statusCode, Headers headers, JSON json) {
                             Log.i(TAG, "Successfully liked the tweet");
                             binding.btnFavorites.setBackgroundResource(R.drawable.ic_vector_heart);
+                            tweet.sumFav();
+                            binding.tvFavCount.setText(tweet.favCount);
                         }
                         @Override
                         public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
@@ -168,16 +178,19 @@ public class TweetDetailActivity extends AppCompatActivity {
                     // TODO: manage favorited change
                     tweet.favorited = true;
                 }
+
             }
         });
     }
 
-//    @Override
-//    public void onBackPressed(){
-//        Intent i = new Intent(TweetDetailActivity.this, TimelineActivity.class);
-//        i.putExtra(Tweet.class.getSimpleName(), Parcels.wrap(tweet));
-//        i.putExtra("Position", POSITION);
-//        setResult(RESULT_OK, i);
-//        finish();
-//    }
+    @Override
+    public void onBackPressed(){
+        Intent i = new Intent(TweetDetailActivity.this, TimelineActivity.class);
+        i.putExtra(Tweet.class.getSimpleName(), Parcels.wrap(tweet));
+        i.putExtra("Position", POSITION);
+        setResult(RESULT_OK, i);
+        finish();
+    }
+
+
 }

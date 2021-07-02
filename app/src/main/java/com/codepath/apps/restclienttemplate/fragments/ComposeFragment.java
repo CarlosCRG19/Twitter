@@ -81,6 +81,7 @@ public class ComposeFragment extends DialogFragment {
                                 ComposeFragmentListener listener = (ComposeFragmentListener) getActivity();
                                 listener.onFinishCompose(tweet);
                                 dismiss();
+                                // getActivity().getFragmentManager().popBackStack();
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -88,7 +89,7 @@ public class ComposeFragment extends DialogFragment {
 
                         @Override
                         public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
-                            Log.e(TAG, "onFailure to publish tweet", throwable);
+                            Log.e(TAG, "onFailure to publish tweet" + response, throwable);
                         }
                     });
                 }

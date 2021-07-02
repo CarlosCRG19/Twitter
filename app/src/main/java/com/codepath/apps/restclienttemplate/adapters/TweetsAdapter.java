@@ -35,7 +35,6 @@ import okhttp3.Headers;
 public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder>{
 
     public static String TAG = "Adapter";
-    public static int REQUEST_CODE = 42;
 
     // Fields
     Context context; // handle to environment
@@ -95,7 +94,7 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
         CardView cvMedia;
         ImageView ivProfileImage, ivMedia;
         Button btnReply, btnFavorites, btnRetweet;
-        TextView tvName, tvScreenName, tvBody, tvTimestamp, tvRtCount, tvFavCount;
+        TextView tvName, tvScreenName, tvBody, tvTimestamp;
 
         // Create an instance of a Twitter client with the current context (from outer class)
         TwitterClient client = new TwitterClient(context);
@@ -115,9 +114,7 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
             tvTimestamp = itemView.findViewById(R.id.tvTimestamp);
 
             btnReply = itemView.findViewById(R.id.btnReply); // Metrics
-            tvRtCount = itemView.findViewById(R.id.tvRtCount);
             btnRetweet = itemView.findViewById(R.id.btnRetweet);
-            tvFavCount = itemView.findViewById(R.id.tvFavCount);
             btnFavorites = itemView.findViewById(R.id.btnFavorites);
 
             itemView.setOnClickListener(this);
@@ -130,14 +127,17 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
                 Tweet tweet = tweets.get(position);
                 Intent i = new Intent(context, TweetDetailActivity.class);
                 i.putExtra(Tweet.class.getSimpleName(), Parcels.wrap(tweet));
-//                i.putExtra("Position", position);
-                //((TimelineActivity) context).startActivityForResult(i, REQUEST_CODE);
-                context.startActivity(i);
+                i.putExtra("Position", position);
+                ((TimelineActivity) context).startActivityForResult(i, ((TimelineActivity) context).REQUEST_CODE_DETAIL);
+                //context.startActivity(i);
             }
         }
 
         // Connect data with VH
-        public void bind(Tweet tweet) throws JSONException {
+        public void bind(final Tweet tweet) throws JSONException {
+
+            // Adapter position
+            final int position = getAdapterPosition();
 
             // User info
             tvName.setText(tweet.user.name);
@@ -168,16 +168,11 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
             if(tweet.favorited) { btnFavorites.setBackgroundResource(R.drawable.ic_vector_heart); }
             if(tweet.retweeted) { btnRetweet.setBackgroundResource(R.drawable.ic_vector_retweet); }
 
-            tvRtCount.setText(tweet.rtCount);
-            tvFavCount.setText(tweet.favCount);
-
             // REPLY button listener
             btnReply.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    int position = getAdapterPosition();
                     if(position != RecyclerView.NO_POSITION) {
-                        Tweet tweet = tweets.get(position);
                         Intent i = new Intent(context, ReplyActivity.class);
                         i.putExtra(Tweet.class.getSimpleName(), Parcels.wrap(tweet));
                         context.startActivity(i);  // if button is clicked start the reply activity
@@ -190,10 +185,6 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
                 @Override
                 public void onClick(View v) {
 
-                    // Find tweet according to adapter position
-                    int position = getAdapterPosition();
-                    Tweet tweet = tweets.get(position);
-
                     // If it has been retweeted by the user, call unretweet method from the client
                     if(tweet.retweeted) {
                         client.postUnretweet(tweet.id, new JsonHttpResponseHandler() { // destroys retweet
@@ -201,14 +192,13 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
                             public void onSuccess(int statusCode, Headers headers, JSON json) {
                                 Log.i(TAG, "Successfully retweeted the tweet");
                                 btnRetweet.setBackgroundResource(R.drawable.ic_vector_retweet_stroke); // change bg to regular stroke
+                                tweet.retweeted = false;
                             }
                             @Override
                             public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
                                 Log.i(TAG, "Failure uretweeting: " + response, throwable); // send message if there is a failure unretweeting
                             }
                         });
-                        // TODO: manage retweeted (how to change the actual) tweet
-                        tweet.retweeted = false;
                     }
 
                     // If it has not been retweeted, use the client's retweet method
@@ -218,6 +208,7 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
                             public void onSuccess(int statusCode, Headers headers, JSON json) {
                                 Log.i(TAG, "Successfully retweeted the tweet");
                                 btnRetweet.setBackgroundResource(R.drawable.ic_vector_retweet);
+                                tweet.retweeted = true;
                             }
 
                             @Override
@@ -225,7 +216,6 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
                                 Log.i(TAG, "Failure retweeting: " + response, throwable);
                             }
                         });
-                        tweet.retweeted = true;
                     }
                 }
             });
@@ -235,10 +225,6 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
                 @Override
                 public void onClick(View v) {
 
-                    // Get tweet according to the position in adapter
-                    int position = getAdapterPosition();
-                    Tweet tweet = tweets.get(position);
-
                     // If it has been favorited, when the user clicks the button it unlikes the tweet and changes the button background
                     if(tweet.favorited) { // if
                         client.postFavorites(tweet.id, "destroy", new JsonHttpResponseHandler() {
@@ -246,14 +232,13 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
                             public void onSuccess(int statusCode, Headers headers, JSON json) {
                                 Log.i(TAG, "Successfully unliked the tweet");
                                 btnFavorites.setBackgroundResource(R.drawable.ic_vector_heart_stroke);
+                                tweet.favorited = false;
                             }
                             @Override
                             public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
                                 Log.i(TAG, "Failure unliking the tweet");
                             }
                         });
-                        // TODO: manage favorited change
-                        tweet.favorited = false;
                     }
 
                     // If it has not been favorited, likes the tweet and changes the button background to a complete heart
@@ -263,14 +248,13 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
                             public void onSuccess(int statusCode, Headers headers, JSON json) {
                                 Log.i(TAG, "Successfully liked the tweet");
                                 btnFavorites.setBackgroundResource(R.drawable.ic_vector_heart);
+                                tweet.favorited = true;
                             }
                             @Override
                             public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
                                 Log.i(TAG, "Failure liking the tweet");
                             }
                         });
-                        // TODO: manage favorited change
-                        tweet.favorited = true;
                     }
 
                 }
