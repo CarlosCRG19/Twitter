@@ -81,7 +81,6 @@ public class ComposeFragment extends DialogFragment {
                                 ComposeFragmentListener listener = (ComposeFragmentListener) getActivity();
                                 listener.onFinishCompose(tweet);
                                 dismiss();
-                                // getActivity().getFragmentManager().popBackStack();
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
