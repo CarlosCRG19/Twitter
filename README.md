@@ -56,7 +56,7 @@ GIF created with [Kap](https://getkap.co/).
 
 ## Notes
 
-Describe any challenges encountered while building the app.
+* Understanding the concept of Fragments and passing information back to the Activities.
 
 ## Open-source libraries used
 
