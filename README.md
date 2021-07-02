@@ -15,7 +15,7 @@ The following **required** functionality is completed:
 * [x] User can **compose and post a new tweet**
   * [x] User can click a “Compose” icon in the Action Bar on the top right
   * [x] User can then enter a new tweet and post this to Twitter
-  * [ ] User is taken back to home timeline with **new tweet visible** in timeline
+  * [ ] User is taken back to home timeline with **new tweet visible** in timeline (this happened when I used the compose action as an activity, but when I refactored everything to a modal overlay, I could not get it to run.
   * [x] Newly created tweet should be manually inserted into the timeline and not rely on a full refresh
 * [x] User can **see a counter with total number of characters left for tweet** on compose tweet page
 * [x] User can **pull down to refresh tweets timeline**
