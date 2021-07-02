@@ -2,7 +2,7 @@
 
 **Name of your app** is an android app that allows a user to view their Twitter timeline and post a new tweet. The app utilizes [Twitter REST API](https://dev.twitter.com/rest/public).
 
-Time spent: **X** hours spent in total
+Time spent: **20 (6 required / 14 on stretch stories)** hours spent in total
 
 ## User Stories
 
@@ -15,7 +15,7 @@ The following **required** functionality is completed:
 * [x] User can **compose and post a new tweet**
   * [x] User can click a “Compose” icon in the Action Bar on the top right
   * [x] User can then enter a new tweet and post this to Twitter
-  * [ ] User is taken back to home timeline with **new tweet visible** in timeline (this happened when I used the compose action as an activity, but when I refactored everything to a modal overlay, I could not get it to run.
+  * [x] User is taken back to home timeline with **new tweet visible** in timeline (this happened when I used the compose action as an activity, but when I refactored everything to a modal overlay, I could not get it to run.
   * [x] Newly created tweet should be manually inserted into the timeline and not rely on a full refresh
 * [x] User can **see a counter with total number of characters left for tweet** on compose tweet page
 * [x] User can **pull down to refresh tweets timeline**
@@ -46,7 +46,7 @@ The following **additional** features are implemented:
 
 Here's a walkthrough of implemented user stories:
 
-<img src='https://imgur.com/BDeU3ZT.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
+<img src='walkthrough (1).gif' title='Video Walkthrough' width='400px' alt='Video Walkthrough' />
 
 GIF created with [Kap](https://getkap.co/).
 
