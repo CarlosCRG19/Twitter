@@ -46,7 +46,7 @@ The following **additional** features are implemented:
 
 Here's a walkthrough of implemented user stories:
 
-<img src='walkthrough (1).gif' title='Video Walkthrough' width='400px' alt='Video Walkthrough' />
+<img src='walkthrough.gif' title='Video Walkthrough' width='400px' alt='Video Walkthrough' />
 
 Gif with Part 2 of stories (Persistance with SQLite and Reply)
 
