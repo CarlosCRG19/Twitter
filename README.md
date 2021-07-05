@@ -60,6 +60,7 @@ GIF created with [Kap](https://getkap.co/).
 
 * Refactor the ComposeActivity into a Fragment. At the beginning it was difficult to understand that the fragment exists on an activity and therefore it is a good idea to use an interface that will be implemented by said activity. This also allows us to transmit information between the fragment and the activity as if we were using a startActivityForResult.
 * Logic for the transmission of tweet modifications between activities (mainly, between TweetDetailsActivity and TimelineActivity). In the end, I had to start the detail view expecting a result and use an intent that would pass the tweet and its position in the RV as extras. A similar intent is used to pass modifications from TweetDetailsActivity to TimelineActivity and in the latter the adapter is notified that there were changes to a specific position.
+* During the demo, a bug appeared in which, when refreshing some tweets at the beginning, they change their like or retweet icon even without being pressed (no request is made and the changes do not persist when passing to the detail view). I could not identify the cause of this before submission time, but my first idea is that the adapter could be passing modifications of the tweets to the wrong positions.
 
 ## Additional features ideas for the future
 
