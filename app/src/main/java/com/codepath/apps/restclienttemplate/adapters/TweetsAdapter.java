@@ -120,6 +120,7 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
             itemView.setOnClickListener(this);
         }
 
+        // Listener to launch the Detail activity and wait for the result (any change on the specific tweet) on TimelineActivity
         @Override
         public void onClick(View v) {
             int position = getAdapterPosition();
@@ -129,7 +130,6 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
                 i.putExtra(Tweet.class.getSimpleName(), Parcels.wrap(tweet));
                 i.putExtra("Position", position);
                 ((TimelineActivity) context).startActivityForResult(i, ((TimelineActivity) context).REQUEST_CODE_DETAIL);
-                //context.startActivity(i);
             }
         }
 

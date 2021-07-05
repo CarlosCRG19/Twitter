@@ -1,13 +1,9 @@
 package com.codepath.apps.restclienttemplate.models;
 
-import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler;
-
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.parceler.Parcel;
@@ -18,8 +14,6 @@ import java.util.List;
 @Parcel
 @Entity
 public class User {
-
-    public static User currentUser;
 
     @ColumnInfo
     @PrimaryKey

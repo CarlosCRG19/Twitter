@@ -6,34 +6,35 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
-import com.codepath.apps.restclienttemplate.R;
 import com.codepath.apps.restclienttemplate.TwitterApp;
 import com.codepath.apps.restclienttemplate.TwitterClient;
 import com.codepath.apps.restclienttemplate.databinding.ActivityComposeBinding;
 import com.codepath.apps.restclienttemplate.models.Tweet;
 import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler;
-import com.google.android.material.textfield.TextInputLayout;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 
 import okhttp3.Headers;
 
+// NOTE: Fragments are reusable portions of the app's UI. They cannot live on their own and are rather hosted by an activity (in this case, TimelineActivity)
+// They have their own layout, lifecycle and input events.
 public class ComposeFragment extends DialogFragment {
 
-    public static final String TAG="ComposeActivity";
-    public static final int MAX_TWEET_LENGTH = 280;
+    // STATIC VARIABLES
+    public static final String TAG="ComposeActivity"; // tag for log messages
+    public static final int MAX_TWEET_LENGTH = 280; // Max number of chars in a tweet
 
-    TwitterClient client;
+    TwitterClient client; // Twitter client for requests
 
-    ActivityComposeBinding binding;
+    ActivityComposeBinding binding; // View binding implementation
 
+    // Interface to be used in the Activity that hosts the fragment
     public interface  ComposeFragmentListener {
         void onFinishCompose(Tweet tweet);
     }
@@ -41,37 +42,42 @@ public class ComposeFragment extends DialogFragment {
     // Empty constructor required for DialogFragment
     public ComposeFragment() {}
 
+    // Creates new fragment
     public static ComposeFragment newInstance() {
-        ComposeFragment frag = new ComposeFragment();
-        return frag;
+        return new ComposeFragment();
     }
 
     // Mandatory methods to create the fragment
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NotNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = ActivityComposeBinding.inflate(getLayoutInflater(), container, false);
-        View view = binding.getRoot();
-        return view;
+        return binding.getRoot();
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NotNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // Assign a RestClient with the context of the host activity
         client = TwitterApp.getRestClient(getActivity());
 
-        binding.inputLayout.setCounterMaxLength(MAX_TWEET_LENGTH);
+        binding.inputLayout.setCounterMaxLength(MAX_TWEET_LENGTH); // set counter max number of characters allowed
 
+        // Listener for the compose button
         binding.btnCompose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Get content of the EditText
                 String tweetContent = binding.etCompose.getText().toString();
+
+                // Handle states of the content
                 if(tweetContent.isEmpty()){
                     Toast.makeText(getActivity(), "Sorry, your tweet cannot be empty", Toast.LENGTH_LONG).show();
                 } else if(tweetContent.length() > MAX_TWEET_LENGTH) {
                     Toast.makeText(getActivity(), "Sorry, your tweet is too long", Toast.LENGTH_LONG).show();
-                } else {
+                } else { // else represents that the content has an allowed length
                     Toast.makeText(getContext(), tweetContent, Toast.LENGTH_LONG).show();
+                    // Make post request with client
                     client.postTweet(tweetContent, new JsonHttpResponseHandler() {
                         @Override
                         public void onSuccess(int statusCode, Headers headers, JSON json) {
@@ -80,7 +86,7 @@ public class ComposeFragment extends DialogFragment {
                                 Tweet tweet = Tweet.fromJson(json.jsonObject);
                                 ComposeFragmentListener listener = (ComposeFragmentListener) getActivity();
                                 listener.onFinishCompose(tweet);
-                                dismiss();
+                                dismiss(); // finish the fragment action
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }

@@ -10,9 +10,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.BadParcelableException;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -85,7 +83,7 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         // Init the list of tweets
-        tweets = new ArrayList<Tweet>();
+        tweets = new ArrayList<>();
         // Init adapter to bind data
         adapter = new TweetsAdapter(this, tweets);
 
@@ -113,7 +111,7 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
         // USER GENERAL INTERACTIONS (REFRESH AND LOAD MORE)
 
         // Refresh
-        swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer); // Swipe container view that allows listening to swiping actions
+        swipeContainer = (SwipeRefreshLayout) binding.swipeContainer; // Swipe container view that allows listening to swiping actions
         // Setup refresh listener which triggers new data loading
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -197,7 +195,7 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
     // Method to add new tweets to the timeline
     private void fetchHomeTimeline() {
         showProgressBar(); // change progress bar visibility
-        initializeMaxId(); // set the minId values
+        initializeMinId(); // set the minId values
         client.getHomeTimeline(minId, new JsonHttpResponseHandler(){ // overloaded method,
 
             @Override
@@ -231,10 +229,8 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
 
     @Override
     public void onFinishCompose(Tweet tweet) {
-        // Get data from intent (tweet object)
-        Tweet newTweet = tweet;
         // Update RV with the tweet
-        tweets.add(0, newTweet);
+        tweets.add(0, tweet);
         // Update Adapter
         adapter.notifyItemInserted(0);
         binding.rvTweets.smoothScrollToPosition(0);
@@ -273,6 +269,25 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
         }
     }
 
+    // DETAIL METHODS
+
+    // Catches the result of a detail activity
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable @org.jetbrains.annotations.Nullable Intent data) {
+
+        if(requestCode == REQUEST_CODE_DETAIL && resultCode == RESULT_OK) {
+            Tweet tweet = Parcels.unwrap(data.getParcelableExtra(Tweet.class.getSimpleName())); // data represents the intent, which contains the tweet and its position in the RV
+            int tweetPos = data.getExtras().getInt("Position");
+            // change tweet in the model
+            tweets.set(tweetPos, tweet);
+            // notify changes in specific position
+            adapter.notifyItemChanged(tweetPos);
+            // return to modified tweet position
+            binding.rvTweets.smoothScrollToPosition(tweetPos);
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
     // OTHER METHODS
 
     // Clear the access token when clicked on logout button (which is part of the menu)
@@ -287,7 +302,7 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
         startActivity(i);
     }
     // Assigns value to the minId, this is to define the oldest tweet on the timeline
-    private void initializeMaxId() {
+    private void initializeMinId() {
         minId = Long.parseLong(tweets.get(0).id);
         for (int i=1; i < tweets.size(); i++) {
             minId = Math.min(minId, Long.parseLong(tweets.get(i).id));
@@ -295,17 +310,4 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
         minId -= 1;
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable @org.jetbrains.annotations.Nullable Intent data) {
-
-        if(requestCode == REQUEST_CODE_DETAIL && resultCode == RESULT_OK) {
-            Log.i("FINISHED ACT", "Yes, youre getting to your activity");
-            Tweet tweet = Parcels.unwrap(data.getParcelableExtra(Tweet.class.getSimpleName()));
-            int tweetPos = data.getExtras().getInt("Position");
-            tweets.set(tweetPos, tweet);
-            adapter.notifyItemChanged(tweetPos);
-            binding.rvTweets.smoothScrollToPosition(tweetPos);
-        }
-        super.onActivityResult(requestCode, resultCode, data);
-    }
 }

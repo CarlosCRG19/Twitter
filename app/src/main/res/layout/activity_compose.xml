@@ -13,7 +13,7 @@
         android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
         android:fontFamily="@font/open_sans_semibold"
-        android:text="New Tweet"
+        android:text="@string/new_tweet"
         android:textColor="@android:color/black"
         android:textSize="25sp" />
 
@@ -54,8 +54,7 @@
         android:text="@string/tweet"
         android:textAllCaps="false"
         android:textColor="@android:color/white"
-        android:textSize="17sp"
-        android:imeOptions="actionDone"/>
+        android:textSize="17sp" />
 
 
 </RelativeLayout>

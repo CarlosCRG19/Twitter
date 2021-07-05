@@ -25,6 +25,7 @@ import okhttp3.Headers;
 
 public class LoginActivity extends OAuthLoginActionBarActivity<TwitterClient> {
 
+	// Sample Dao code provided by CodePath
 	SampleModelDao sampleModelDao;
 
 	@Override
@@ -64,25 +65,6 @@ public class LoginActivity extends OAuthLoginActionBarActivity<TwitterClient> {
 		// Call the method that verifies credentials --> user
 		Intent i = new Intent(LoginActivity.this, TimelineActivity.class);
 		startActivity(i);
-//		getClient().getCredentials(new JsonHttpResponseHandler() {
-//			@Override
-//			public void onSuccess(int statusCode, Headers headers, JSON json) {
-//				JSONObject userCredentials = json.jsonObject;
-//				try {
-//					User.currentUser = User.fromJson(userCredentials);
-//
-//					Log.d("LoginSuccess", "Success");
-//				} catch (JSONException e) {
-//					e.printStackTrace();
-//					Log.d( "onSuccess Catch", "Succeeded but: ", e);
-//				}
-//			}
-//
-//			@Override
-//			public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
-//				Log.d("onFailure", "Failed", throwable);
-//			}
-//		});
 	}
 
 	// OAuth authentication flow failed, handle the error

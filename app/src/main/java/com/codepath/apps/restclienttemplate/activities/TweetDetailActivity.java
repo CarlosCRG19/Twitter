@@ -26,7 +26,6 @@ public class TweetDetailActivity extends AppCompatActivity {
 
     // Static variables
     public static String TAG = "ReplyActivity"; // Tag for log messages
-    public static final int MAX_TWEET_LENGTH = 280; // Max length to use in counter
 
     // Member variables
     Tweet tweet; // tweet received from intent
@@ -53,6 +52,11 @@ public class TweetDetailActivity extends AppCompatActivity {
         tweet = (Tweet) Parcels.unwrap(getIntent().getParcelableExtra(Tweet.class.getSimpleName()));
 
         // CONNECT TWEET INFO TO VIEWS
+        populateViews();
+        setBtnListeners();
+    }
+
+    private void populateViews() {
 
         // User info
         binding.tvName.setText(tweet.user.name);
@@ -83,14 +87,18 @@ public class TweetDetailActivity extends AppCompatActivity {
 
         binding.tvRtCount.setText(tweet.rtCount);
         binding.tvFavCount.setText(tweet.favCount);
+    }
+
+    // Assigns a listener to each button
+    private void setBtnListeners() {
 
         // REPLY button listener
         binding.btnReply.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                    Intent i = new Intent(TweetDetailActivity.this, ReplyActivity.class);
-                    i.putExtra(Tweet.class.getSimpleName(), Parcels.wrap(tweet));
-                    startActivity(i);
+                Intent i = new Intent(TweetDetailActivity.this, ReplyActivity.class);
+                i.putExtra(Tweet.class.getSimpleName(), Parcels.wrap(tweet));
+                startActivity(i);
             }
         });
 
@@ -107,14 +115,13 @@ public class TweetDetailActivity extends AppCompatActivity {
                             binding.btnRetweet.setBackgroundResource(R.drawable.ic_vector_retweet_stroke); // change bg to regular stroke
                             tweet.subRt();
                             binding.tvRtCount.setText(tweet.rtCount);
+                            tweet.retweeted = false;
                         }
                         @Override
                         public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
                             Log.i(TAG, "Failure uretweeting: " + response, throwable); // send message if there is a failure unretweeting
                         }
                     });
-                    // TODO: manage retweeted (how to change the actual) tweet
-                    tweet.retweeted = false;
                 }
 
                 // If it has not been retweeted, use the client's retweet method
@@ -126,13 +133,13 @@ public class TweetDetailActivity extends AppCompatActivity {
                             binding.btnRetweet.setBackgroundResource(R.drawable.ic_vector_retweet);
                             tweet.sumRt();
                             binding.tvRtCount.setText(tweet.rtCount);
+                            tweet.retweeted = true;
                         }
                         @Override
                         public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
                             Log.i(TAG, "Failure retweeting: " + response, throwable);
                         }
                     });
-                    tweet.retweeted = true;
                 }
             }
         });
@@ -150,14 +157,13 @@ public class TweetDetailActivity extends AppCompatActivity {
                             binding.btnFavorites.setBackgroundResource(R.drawable.ic_vector_heart_stroke);
                             tweet.subFav();
                             binding.tvFavCount.setText(tweet.favCount);
+                            tweet.favorited = false;
                         }
                         @Override
                         public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
                             Log.i(TAG, "Failure unliking the tweet");
                         }
                     });
-                    // TODO: manage favorited change
-                    tweet.favorited = false;
                 }
 
                 // If it has not been favorited, likes the tweet and changes the button background to a complete heart
@@ -169,25 +175,29 @@ public class TweetDetailActivity extends AppCompatActivity {
                             binding.btnFavorites.setBackgroundResource(R.drawable.ic_vector_heart);
                             tweet.sumFav();
                             binding.tvFavCount.setText(tweet.favCount);
+                            tweet.favorited = true;
                         }
                         @Override
                         public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
                             Log.i(TAG, "Failure liking the tweet");
                         }
                     });
-                    // TODO: manage favorited change
-                    tweet.favorited = true;
                 }
-
             }
         });
     }
 
+    // When the user press to go back, the result of the activity is changed to OK and an intent passes the modified tweet info to TimelineActivity
+    // so changes can persist in the main timeline
     @Override
     public void onBackPressed(){
+        // Connect two activities through intents
         Intent i = new Intent(TweetDetailActivity.this, TimelineActivity.class);
+        // Pass the tweet with Parcels
         i.putExtra(Tweet.class.getSimpleName(), Parcels.wrap(tweet));
+        // Pass the position of the tweet
         i.putExtra("Position", POSITION);
+        // Set result
         setResult(RESULT_OK, i);
         finish();
     }

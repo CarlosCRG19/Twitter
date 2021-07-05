@@ -46,7 +46,12 @@ public class ReplyActivity extends AppCompatActivity {
         tweet = (Tweet) Parcels.unwrap(getIntent().getParcelableExtra(Tweet.class.getSimpleName()));
 
         // CONNECT TWEET INFO WITH VIEWS
+        populateViews();
+        setBtnListeners();
+    }
 
+    // Binds the tweet data into the views
+    private void populateViews() {
         // User info
         binding.tvName.setText(tweet.user.name);
         binding.tvScreenName.setText(" @" + tweet.user.screenName);
@@ -61,7 +66,10 @@ public class ReplyActivity extends AppCompatActivity {
         // Reply views
         binding.etReply.setText("@" + tweet.user.screenName); // Get the name of the user who wrote the tweet
         binding.ilReply.setCounterMaxLength(MAX_TWEET_LENGTH); // Set the max characters for the content
+    }
 
+    // Set interaction buttons listeners
+    private void setBtnListeners(){
         // Reply button listener
         binding.btnReply.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -89,6 +97,5 @@ public class ReplyActivity extends AppCompatActivity {
                 }
             }
         });
-
     }
 }

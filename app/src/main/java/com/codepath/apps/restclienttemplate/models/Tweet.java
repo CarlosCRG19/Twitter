@@ -176,7 +176,7 @@ public class Tweet {
         if(isNum){
             int intFavCount = Integer.parseInt(this.favCount);
             this.favCount = String.valueOf(intFavCount - 1);
-        } else if (this.favCount == "1K") {
+        } else if (this.favCount.equals("1K")) {
             this.favCount = "999";
         }
     }

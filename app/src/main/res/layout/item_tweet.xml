@@ -6,8 +6,8 @@
     android:layout_height="wrap_content"
     android:paddingTop="15dp"
     android:paddingBottom="15dp"
-    android:paddingLeft="15dp"
-    android:paddingRight="20dp">
+    android:paddingStart="15dp"
+    android:paddingEnd="20dp">
 
     <ImageView
         android:id="@+id/ivProfileImage"
@@ -25,7 +25,7 @@
         android:layout_marginStart="15dp"
         android:layout_toEndOf="@+id/ivProfileImage"
         android:fontFamily="@font/open_sans_semibold"
-        android:text="TextView"
+        tools:text="Name"
         android:textColor="@android:color/black" />
 
     <TextView
@@ -35,7 +35,7 @@
         android:layout_alignParentTop="true"
         android:layout_toEndOf="@+id/tvName"
         android:fontFamily="@font/open_sans_light"
-        android:text="TextView" />
+        tools:text="ScreenName" />
 
     <TextView
         android:id="@+id/tvBody"
@@ -47,7 +47,7 @@
         android:layout_toEndOf="@+id/ivProfileImage"
         android:autoLink="all"
         android:fontFamily="@font/open_sans_light"
-        android:text="TextView"
+        tools:text="Tweet Body"
         android:textColor="@android:color/black" />
 
     <TextView
@@ -58,7 +58,7 @@
         android:layout_alignParentEnd="true"
         android:layout_toEndOf="@+id/tvScreenName"
         android:fontFamily="@font/open_sans_light"
-        android:gravity="right"
+        android:gravity="end"
         tools:text="an hour ago" />
 
     <androidx.cardview.widget.CardView
