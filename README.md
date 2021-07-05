@@ -15,7 +15,7 @@ The following **required** functionality is completed:
 * [x] User can **compose and post a new tweet**
   * [x] User can click a “Compose” icon in the Action Bar on the top right
   * [x] User can then enter a new tweet and post this to Twitter
-  * [x] User is taken back to home timeline with **new tweet visible** in timeline (this happened when I used the compose action as an activity, but when I refactored everything to a modal overlay, I could not get it to run.
+  * [x] User is taken back to home timeline with **new tweet visible** in timeline 
   * [x] Newly created tweet should be manually inserted into the timeline and not rely on a full refresh
 * [x] User can **see a counter with total number of characters left for tweet** on compose tweet page
 * [x] User can **pull down to refresh tweets timeline**
@@ -40,7 +40,9 @@ The following **optional** features are implemented:
 
 The following **additional** features are implemented:
 
-* [x] Lots of UI improvement
+* [x] Lots of UI improvement (UI inspired by Omar Ali Badr: https://www.behance.net/gallery/102573777/Twitter-App-UIUX-Redesign)
+* [x] Count of favorites and retweets are displayed
+* [x] Interactions can be done on the main timeline (not only in detail view) and changes persist between activities  
 
 ## Video Walkthrough
 
@@ -48,15 +50,24 @@ Here's a walkthrough of implemented user stories:
 
 <img src='walkthrough.gif' title='Video Walkthrough' width='400px' alt='Video Walkthrough' />
 
-Gif with Part 2 of stories (Persistance with SQLite and Reply)
+### Gif with Part 2 of stories (Persistance with SQLite and Reply)
 
 <img src='walkthrough_extra.gif' title='Video Walkthrough' width='400px' alt='Video Walkthrough' />
 
 GIF created with [Kap](https://getkap.co/).
 
-## Notes
+## Notes (Challenges encountered while building the app.)
 
-* Understanding the concept of Fragments and passing information back to the Activities.
+* Refactor the ComposeActivity into a Fragment. At the beginning it was difficult to understand that the fragment exists on an activity and therefore it is a good idea to use an interface that will be implemented by said activity. This also allows us to transmit information between the fragment and the activity as if we were using a startActivityForResult.
+* Logic for the transmission of tweet modifications between activities (mainly, between TweetDetailsActivity and TimelineActivity). In the end, I had to start the detail view expecting a result and use an intent that would pass the tweet and its position in the RV as extras. A similar intent is used to pass modifications from TweetDetailsActivity to TimelineActivity and in the latter the adapter is notified that there were changes to a specific position.
+
+## Additional features ideas for the future
+
+* Include dark mode. Refer to this guide https://www.geeksforgeeks.org/how-to-implement-dark-night-mode-in-android-app/ (Provided by Ainsley, my manager)
+* Add current user information at the top left of the app (profile pic, name and screen name). This can be done in the login activity doing a request to get the login credentials (GET account/verify_credentials).
+* Click on image to open it
+* Finish missing stretch stories. The list of followers can be obtained with another request (GET followers/list) so a new UserDetailActivity can be created in which both lists can be displayed (maybe, with a TabLayout)
+
 
 ## Open-source libraries used
 
